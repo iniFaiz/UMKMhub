@@ -7,7 +7,7 @@
         <div class="rounded-3xl p-7 sm:p-10 lg:p-16 xl:p-20 lg:min-h-[calc(100vh-7rem)] lg:flex lg:flex-col lg:justify-center">
           <div class="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-semibold mb-6 mx-auto">
             <span class="w-2 h-2 rounded-full bg-primary"></span>
-            E-Catalog UMKM Indonesia
+            E-Catalog UMKM RT.33 
           </div>
 
           <h1 class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-tight mb-6">
@@ -18,7 +18,7 @@
           </h1>
 
           <p class="text-gray-500 text-lg sm:text-xl max-w-3xl mx-auto mb-10 leading-relaxed">
-            Jelajahi usaha mikro, kecil, dan menengah lokal dari kuliner, fashion, kerajinan, minuman, sampai jasa harian.
+            Jelajahi usaha mikro, kecil, dan menengah lokal dari kuliner, minuman, sampai jasa harian.
           </p>
 
           <div
