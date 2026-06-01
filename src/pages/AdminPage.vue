@@ -1,0 +1,1269 @@
+<template>
+  <div class="min-h-screen bg-gray-50 flex">
+    <Transition name="fade">
+      <div
+        v-if="sidebarOpen"
+        class="fixed inset-0 bg-black/40 z-40 lg:hidden"
+        @click="sidebarOpen = false"
+      />
+    </Transition>
+
+    <Transition name="slide">
+      <aside
+        v-show="sidebarOpen || !isMobile"
+        :class="[
+          'fixed lg:sticky inset-y-0 left-0 top-0 z-50 w-64 h-screen bg-[#59B292] text-white flex flex-col shadow-xl',
+          'transform transition-transform duration-300 ease-in-out',
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        ]"
+      >
+        <div class="p-6 border-b border-white/20">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9.5 12 4l9 5.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5Z" />
+              </svg>
+            </div>
+            <div>
+              <h2 class="font-bold text-lg leading-tight">UMKM Admin</h2>
+              <p class="text-xs text-white/70">Panel Pengelolaan</p>
+            </div>
+          </div>
+        </div>
+
+        <nav class="flex-1 p-4 space-y-1">
+          <button
+            @click="setSection('dashboard')"
+            :class="navButtonClass('dashboard')"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 13h6V4H4v9Zm10 7h6V4h-6v16ZM4 20h6v-3H4v3Z" />
+            </svg>
+            <span>Dashboard</span>
+          </button>
+          <button
+            @click="setSection('manage')"
+            :class="navButtonClass('manage')"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h10" />
+            </svg>
+            <span>Kelola UMKM</span>
+          </button>
+          <button
+            @click="setSection('categories')"
+            :class="navButtonClass('categories')"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5h16v14H4zM4 10h16M9 5v14M15 5v14" />
+            </svg>
+            <span>Kategori</span>
+          </button>
+        </nav>
+
+        <div class="p-4 border-t border-white/20 space-y-1">
+          <router-link
+            to="/"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/80 hover:bg-white/10 hover:text-white transition-all duration-200"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            <span>Kembali ke Beranda</span>
+          </router-link>
+          <button
+            @click="logout"
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-white/80 hover:bg-white/10 hover:text-white transition-all duration-200"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H3m12 0-4-4m4 4-4 4m5-13h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3" />
+            </svg>
+            <span>Keluar</span>
+          </button>
+        </div>
+      </aside>
+    </Transition>
+
+    <div class="flex-1 flex flex-col min-w-0">
+      <header class="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-30">
+        <div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16">
+          <div class="flex items-center gap-4 min-w-0">
+            <button
+              @click="sidebarOpen = !sidebarOpen"
+              class="lg:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+              aria-label="Buka menu admin"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path v-if="!sidebarOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <h1 class="text-lg sm:text-xl font-bold text-gray-800 truncate">
+              {{ pageTitle }}
+            </h1>
+          </div>
+          <div class="flex items-center gap-3 min-w-0">
+            <span class="hidden sm:block text-sm text-gray-500 truncate max-w-52">{{ adminEmail }}</span>
+            <div class="w-9 h-9 bg-[#59B292] rounded-full flex items-center justify-center text-white font-bold text-sm">
+              A
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">
+        <section v-if="activeSection === 'dashboard'">
+          <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 mb-8">
+            <article class="stat-card">
+              <div class="stat-icon bg-[#59B292]/10 text-[#59B292]">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9.5 12 4l9 5.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5Z" />
+                </svg>
+              </div>
+              <p class="text-3xl font-bold text-gray-800 mt-4">{{ stats.totalUmkm }}</p>
+              <p class="text-sm text-gray-500 mt-1">Total UMKM</p>
+            </article>
+
+            <article class="stat-card">
+              <div class="stat-icon bg-[#FFC94D]/10 text-[#c28c00]">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5h16v14H4zM4 10h16M9 5v14M15 5v14" />
+                </svg>
+              </div>
+              <p class="text-3xl font-bold text-gray-800 mt-4">{{ stats.totalKategori }}</p>
+              <p class="text-sm text-gray-500 mt-1">Total Kategori</p>
+            </article>
+
+            <article class="stat-card">
+              <div class="stat-icon bg-[#FA6781]/10 text-[#FA6781]">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7V8Z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.3 7 12 12l8.7-5M12 22V12" />
+                </svg>
+              </div>
+              <p class="text-3xl font-bold text-gray-800 mt-4">{{ stats.totalProduk }}</p>
+              <p class="text-sm text-gray-500 mt-1">Total Produk</p>
+            </article>
+          </div>
+
+          <article class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">Distribusi Kategori</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div
+                v-for="cat in categoryDistribution"
+                :key="cat.name"
+                class="flex items-center gap-4 p-4 rounded-xl bg-gray-50 hover:bg-[#FAE7CB]/30 transition-colors duration-200"
+              >
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center" :class="cat.bgClass">
+                  <CategoryIcon :name="cat.name" class="w-5 h-5" />
+                </div>
+                <div>
+                  <p class="font-semibold text-gray-800">{{ cat.name }}</p>
+                  <p class="text-sm text-gray-500">{{ cat.count }} UMKM</p>
+                </div>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section v-if="activeSection === 'manage'">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+            <button
+              @click="openAddModal"
+              class="flex items-center gap-2 bg-[#59B292] hover:bg-[#4a9e80] text-white px-5 py-2.5 rounded-xl font-semibold shadow-sm hover:shadow-md transition-all duration-200 active:scale-[0.97]"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              Tambah UMKM
+            </button>
+
+            <div class="relative w-full sm:w-80">
+              <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" />
+              </svg>
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="Cari UMKM..."
+                class="form-input admin-search-input"
+              />
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-2 mb-6">
+            <button
+              @click="filterCategory = ''"
+              :class="categoryFilterClass('')"
+            >
+              Semua
+            </button>
+            <button
+              v-for="cat in umkmStore.getCategories()"
+              :key="cat"
+              @click="filterCategory = cat"
+              :class="categoryFilterClass(cat)"
+            >
+              {{ cat }}
+            </button>
+          </div>
+
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead>
+                  <tr class="bg-gray-50 border-b border-gray-100">
+                    <th class="text-left px-6 py-4 font-semibold text-gray-600 w-12">No</th>
+                    <th class="text-left px-6 py-4 font-semibold text-gray-600">Nama Usaha</th>
+                    <th class="text-left px-6 py-4 font-semibold text-gray-600 hidden md:table-cell">Pemilik</th>
+                    <th class="text-left px-6 py-4 font-semibold text-gray-600 hidden sm:table-cell">Kategori</th>
+                    <th class="text-center px-6 py-4 font-semibold text-gray-600">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="(item, index) in filteredUmkm"
+                    :key="item.id"
+                    class="border-b border-gray-50 hover:bg-[#FAE7CB]/20 transition-colors duration-150"
+                  >
+                    <td class="px-6 py-4 text-gray-500 font-medium">{{ index + 1 }}</td>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center gap-3">
+                        <img
+                          v-if="item.foto?.utama"
+                          :src="item.foto.utama"
+                          :alt="item.namaUsaha"
+                          class="w-10 h-10 rounded-lg object-cover flex-shrink-0 hidden sm:block"
+                        />
+                        <div>
+                          <p class="font-semibold text-gray-800">{{ item.namaUsaha }}</p>
+                          <p class="text-xs text-gray-400 sm:hidden">{{ item.kategori }}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 text-gray-600 hidden md:table-cell">{{ item.namaPemilik }}</td>
+                    <td class="px-6 py-4 hidden sm:table-cell">
+                      <span
+                        :class="categoryBadgeClass(item.kategori)"
+                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
+                      >
+                        <CategoryIcon :name="item.kategori" class="w-3.5 h-3.5" />
+                        {{ item.kategori }}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center justify-center gap-2">
+                        <button
+                          @click="openEditModal(item)"
+                          class="p-2 rounded-lg text-[#59B292] hover:bg-[#59B292]/10 transition-colors duration-200"
+                          title="Edit"
+                        >
+                          <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5m-1.4-9.4a2 2 0 1 1 2.8 2.8L11.8 15H9v-2.8l8.6-8.6Z" />
+                          </svg>
+                        </button>
+                        <button
+                          @click="openDeleteModal(item)"
+                          class="p-2 rounded-lg text-[#FA6781] hover:bg-[#FA6781]/10 transition-colors duration-200"
+                          title="Hapus"
+                        >
+                          <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 7-.9 12.1A2 2 0 0 1 16.1 21H7.9a2 2 0 0 1-2-1.9L5 7m5 4v6m4-6v6m1-10V4a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr v-if="filteredUmkm.length === 0">
+                    <td colspan="5" class="px-6 py-16 text-center">
+                      <div class="flex flex-col items-center gap-3">
+                        <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" />
+                        </svg>
+                        <p class="text-gray-500 font-medium">Tidak ada UMKM ditemukan</p>
+                        <p class="text-sm text-gray-400">Coba ubah kata kunci pencarian atau filter kategori</p>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 text-sm text-gray-500">
+              Menampilkan {{ filteredUmkm.length }} dari {{ umkmStore.getAll().length }} UMKM
+            </div>
+          </div>
+        </section>
+
+        <section v-if="activeSection === 'categories'">
+          <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_22rem] gap-6">
+            <article class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+              <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between gap-4">
+                <div>
+                  <h2 class="text-lg font-bold text-gray-800">Kategori UMKM</h2>
+                  <p class="text-sm text-gray-500 mt-1">Tambah, ubah, atau hapus kategori yang belum dipakai.</p>
+                </div>
+                <span class="text-sm font-semibold text-[#59B292] bg-[#59B292]/10 rounded-full px-3 py-1">
+                  {{ umkmStore.getCategories().length }} kategori
+                </span>
+              </div>
+
+              <div class="divide-y divide-gray-100">
+                <div
+                  v-for="cat in umkmStore.getCategories()"
+                  :key="cat"
+                  class="px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+                >
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-[#59B292]/10 text-[#59B292] flex items-center justify-center">
+                      <CategoryIcon :name="cat" class="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p class="font-semibold text-gray-800">{{ cat }}</p>
+                      <p class="text-sm text-gray-500">{{ categoryUsage(cat) }} UMKM</p>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center gap-2">
+                    <button
+                      @click="startEditCategory(cat)"
+                      class="px-3 py-2 rounded-lg text-sm font-semibold text-[#59B292] hover:bg-[#59B292]/10 transition-colors"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      @click="removeCategory(cat)"
+                      class="px-3 py-2 rounded-lg text-sm font-semibold text-[#FA6781] hover:bg-[#FA6781]/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      :disabled="categoryUsage(cat) > 0"
+                      :title="categoryUsage(cat) > 0 ? 'Kategori masih dipakai UMKM' : 'Hapus kategori'"
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <aside class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-fit">
+              <h2 class="text-lg font-bold text-gray-800 mb-4">
+                {{ editingCategory ? 'Edit Kategori' : 'Tambah Kategori' }}
+              </h2>
+              <div class="space-y-4">
+                <div>
+                  <label class="form-label">Nama Kategori</label>
+                  <input
+                    v-model.trim="categoryFormName"
+                    type="text"
+                    class="form-input"
+                    placeholder="Contoh: Elektronik"
+                    @keyup.enter="saveCategory"
+                  />
+                </div>
+                <div class="flex items-center gap-2">
+                  <button
+                    @click="saveCategory"
+                    class="flex-1 px-4 py-2.5 rounded-xl bg-[#59B292] text-white text-sm font-semibold hover:bg-[#478f76] transition-colors"
+                  >
+                    {{ editingCategory ? 'Simpan' : 'Tambah' }}
+                  </button>
+                  <button
+                    v-if="editingCategory"
+                    @click="cancelCategoryEdit"
+                    class="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition-colors"
+                  >
+                    Batal
+                  </button>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <Transition name="modal">
+      <div
+        v-if="showFormModal"
+        class="fixed inset-0 z-[60] flex items-start justify-center p-4 overflow-y-auto"
+      >
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" @click="closeFormModal" />
+
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl my-8 z-10">
+          <div class="sticky top-0 bg-white rounded-t-2xl border-b border-gray-100 px-6 py-4 flex items-center justify-between z-10">
+            <h2 class="text-xl font-bold text-gray-800">
+              {{ isEditing ? 'Edit UMKM' : 'Tambah UMKM Baru' }}
+            </h2>
+            <button
+              @click="closeFormModal"
+              class="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              aria-label="Tutup form"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <div class="px-6 py-6 space-y-8 max-h-[calc(100vh-12rem)] overflow-y-auto">
+            <fieldset>
+              <legend class="form-legend">
+                <IconInfo />
+                Informasi Dasar
+              </legend>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="form-label">Nama Usaha <span class="text-[#FA6781]">*</span></label>
+                  <input v-model="form.namaUsaha" type="text" class="form-input" placeholder="Masukkan nama usaha" />
+                </div>
+                <div>
+                  <label class="form-label">Nama Pemilik <span class="text-[#FA6781]">*</span></label>
+                  <input v-model="form.namaPemilik" type="text" class="form-input" placeholder="Masukkan nama pemilik" />
+                </div>
+                <div>
+                  <label class="form-label">Kategori <span class="text-[#FA6781]">*</span></label>
+                  <select v-model="form.kategori" class="form-input">
+                    <option value="" disabled>Pilih kategori</option>
+                    <option v-for="cat in categoryOptions" :key="cat" :value="cat">{{ cat }}</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label">Alamat</label>
+                  <input v-model="form.alamat" type="text" class="form-input" placeholder="Masukkan alamat lengkap" />
+                </div>
+                <div class="md:col-span-2">
+                  <label class="form-label">Google Maps Embed / Link / Koordinat</label>
+                  <input
+                    v-model="form.mapsEmbed"
+                    type="text"
+                    class="form-input"
+                    placeholder="Paste iframe, link Google Maps, atau koordinat"
+                  />
+                </div>
+                <div class="md:col-span-2">
+                  <label class="form-label">Deskripsi</label>
+                  <textarea v-model="form.deskripsi" rows="3" class="form-input resize-none" placeholder="Tuliskan deskripsi UMKM..."></textarea>
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend class="form-legend">
+                <IconPhone />
+                Kontak
+              </legend>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="form-label">Telepon</label>
+                  <input v-model="form.kontak.telepon" type="text" class="form-input" placeholder="0812-xxxx-xxxx" />
+                </div>
+                <div>
+                  <label class="form-label">WhatsApp</label>
+                  <input v-model="form.kontak.whatsapp" type="text" class="form-input" placeholder="0812-xxxx-xxxx" />
+                </div>
+                <div>
+                  <label class="form-label">Instagram</label>
+                  <input v-model="form.kontak.instagram" type="text" class="form-input" placeholder="@username" />
+                </div>
+                <div>
+                  <label class="form-label">Email</label>
+                  <input v-model="form.kontak.email" type="email" class="form-input" placeholder="email@example.com" />
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend class="form-legend">
+                <IconClock />
+                Jam Operasional
+              </legend>
+              <div class="space-y-3">
+                <div
+                  v-for="(jam, index) in form.jamOperasional"
+                  :key="index"
+                  class="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-3"
+                >
+                  <input v-model="jam.hari" type="text" class="form-input" placeholder="Senin - Jumat" />
+                  <input v-model="jam.jam" type="text" class="form-input" placeholder="08:00 - 17:00" />
+                  <button
+                    @click="removeJamOperasional(index)"
+                    class="icon-action text-[#FA6781] hover:bg-[#FA6781]/10"
+                    :disabled="form.jamOperasional.length <= 1"
+                    :class="{ 'opacity-30 cursor-not-allowed': form.jamOperasional.length <= 1 }"
+                    type="button"
+                  >
+                    <IconTrash />
+                  </button>
+                </div>
+                <button
+                  @click="addJamOperasional"
+                  class="add-inline-button"
+                  type="button"
+                >
+                  <IconPlus />
+                  Tambah Jam Operasional
+                </button>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend class="form-legend">
+                <IconBox />
+                Produk
+              </legend>
+              <div class="space-y-4">
+                <div
+                  v-for="(produk, index) in form.produk"
+                  :key="index"
+                  class="p-4 border border-gray-200 rounded-xl bg-gray-50/50"
+                >
+                  <div class="flex items-center justify-between mb-3">
+                    <span class="text-sm font-semibold text-gray-500">Produk {{ index + 1 }}</span>
+                    <button
+                      @click="removeProduk(index)"
+                      class="icon-action text-[#FA6781] hover:bg-[#FA6781]/10"
+                      :disabled="form.produk.length <= 1"
+                      :class="{ 'opacity-30 cursor-not-allowed': form.produk.length <= 1 }"
+                      type="button"
+                    >
+                      <IconTrash />
+                    </button>
+                  </div>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <input v-model="produk.nama" type="text" class="form-input" placeholder="Nama produk" />
+                    <input v-model.number="produk.harga" type="number" class="form-input" placeholder="Harga (Rp)" />
+                    <div class="md:col-span-2">
+                      <input v-model="produk.deskripsi" type="text" class="form-input" placeholder="Deskripsi singkat produk" />
+                    </div>
+                  </div>
+                </div>
+                <button
+                  @click="addProduk"
+                  class="add-inline-button"
+                  type="button"
+                >
+                  <IconPlus />
+                  Tambah Produk
+                </button>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend class="form-legend">
+                <IconCard />
+                Metode Pembayaran
+              </legend>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <label
+                  v-for="metode in allPaymentMethods"
+                  :key="metode"
+                  class="flex items-center gap-2.5 p-3 border rounded-xl cursor-pointer transition-all duration-200"
+                  :class="form.metodePembayaran.includes(metode)
+                    ? 'border-[#59B292] bg-[#59B292]/5 text-[#59B292]'
+                    : 'border-gray-200 hover:border-gray-300 text-gray-600'"
+                >
+                  <input
+                    type="checkbox"
+                    :value="metode"
+                    v-model="form.metodePembayaran"
+                    class="w-4 h-4 rounded border-gray-300 text-[#59B292] focus:ring-[#59B292]"
+                  />
+                  <span class="text-sm font-medium">{{ metode }}</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend class="form-legend">
+                <IconImage />
+                Foto (URL)
+              </legend>
+              <div class="space-y-4">
+                <div>
+                  <label class="form-label">Foto Utama</label>
+                  <input v-model="form.foto.utama" type="url" class="form-input" placeholder="https://example.com/foto-utama.jpg" />
+                </div>
+                <div>
+                  <label class="form-label">Foto Menu</label>
+                  <input v-model="form.foto.menu" type="url" class="form-input" placeholder="https://example.com/foto-menu.jpg" />
+                </div>
+                <UrlList v-model="form.foto.tempat" label="Foto Tempat" />
+                <UrlList v-model="form.foto.produk" label="Foto Produk" />
+              </div>
+            </fieldset>
+          </div>
+
+          <div class="sticky bottom-0 bg-white rounded-b-2xl border-t border-gray-100 px-6 py-4 flex items-center justify-end gap-3">
+            <button
+              @click="closeFormModal"
+              class="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 font-medium text-sm transition-colors"
+            >
+              Batal
+            </button>
+            <button
+              @click="saveUmkm"
+              class="px-6 py-2.5 rounded-xl bg-[#59B292] hover:bg-[#4a9e80] text-white font-semibold text-sm shadow-sm hover:shadow-md transition-all duration-200 active:scale-[0.97]"
+            >
+              {{ isEditing ? 'Simpan Perubahan' : 'Tambah UMKM' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <Transition name="modal">
+      <div
+        v-if="showDeleteModal"
+        class="fixed inset-0 z-[60] flex items-center justify-center p-4"
+      >
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" @click="showDeleteModal = false" />
+
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md z-10 p-6">
+          <div class="flex flex-col items-center text-center">
+            <div class="w-16 h-16 bg-[#FA6781]/10 rounded-full flex items-center justify-center mb-4">
+              <svg class="w-8 h-8 text-[#FA6781]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M4.1 19h15.8L12 4 4.1 19Z" />
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Hapus UMKM?</h3>
+            <p class="text-gray-500 mb-1">Apakah Anda yakin ingin menghapus</p>
+            <p class="font-semibold text-gray-700 mb-6">"{{ deleteTarget?.namaUsaha }}"?</p>
+            <p class="text-sm text-gray-400 mb-6">Tindakan ini tidak dapat dibatalkan.</p>
+            <div class="flex gap-3 w-full">
+              <button
+                @click="showDeleteModal = false"
+                class="flex-1 px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 font-medium text-sm transition-colors"
+              >
+                Batal
+              </button>
+              <button
+                @click="confirmDelete"
+                class="flex-1 px-5 py-2.5 rounded-xl bg-[#FA6781] hover:bg-[#e85a73] text-white font-semibold text-sm shadow-sm hover:shadow-md transition-all duration-200 active:scale-[0.97]"
+              >
+                Ya, Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <Transition name="toast">
+      <div
+        v-if="toast.show"
+        class="fixed bottom-6 right-6 z-[70] flex items-center gap-3 bg-white border border-gray-100 shadow-lg rounded-xl px-5 py-3.5"
+      >
+        <div
+          class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm"
+          :class="toast.type === 'success' ? 'bg-[#59B292]' : 'bg-[#FA6781]'"
+        >
+          <svg v-if="toast.type === 'success'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="m5 13 4 4L19 7" />
+          </svg>
+          <span v-else>!</span>
+        </div>
+        <p class="text-sm font-medium text-gray-700">{{ toast.message }}</p>
+      </div>
+    </Transition>
+  </div>
+</template>
+
+<script setup>
+import { computed, defineComponent, h, onMounted, onUnmounted, reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import CategoryIcon from '../components/CategoryIcon.vue'
+import { umkmStore } from '../data/umkmData'
+
+const router = useRouter()
+const sidebarOpen = ref(false)
+const activeSection = ref('dashboard')
+const searchQuery = ref('')
+const filterCategory = ref('')
+const isMobile = ref(false)
+const showFormModal = ref(false)
+const showDeleteModal = ref(false)
+const isEditing = ref(false)
+const editingId = ref(null)
+const deleteTarget = ref(null)
+const categoryFormName = ref('')
+const editingCategory = ref('')
+const toast = reactive({ show: false, message: '', type: 'success' })
+const adminEmail = sessionStorage.getItem('umkm-admin-email') || 'Admin'
+
+const categoryOptions = computed(() => umkmStore.getCategories())
+const allPaymentMethods = [
+  'Tunai', 'QRIS', 'GoPay', 'OVO',
+  'Dana', 'Transfer Bank', 'Kartu Debit', 'Kartu Kredit'
+]
+
+const getEmptyForm = () => ({
+  namaUsaha: '',
+  namaPemilik: '',
+  kategori: '',
+  deskripsi: '',
+  alamat: '',
+  mapsEmbed: '',
+  kontak: { telepon: '', whatsapp: '', instagram: '', email: '' },
+  jamOperasional: [{ hari: '', jam: '' }],
+  produk: [{ nama: '', harga: 0, deskripsi: '' }],
+  metodePembayaran: [],
+  foto: { utama: '', tempat: [''], produk: [''], menu: '' }
+})
+
+const form = reactive(getEmptyForm())
+
+const stats = computed(() => {
+  const all = umkmStore.getAll()
+  const totalProduk = all.reduce((sum, item) => sum + (item.produk?.length || 0), 0)
+  return {
+    totalUmkm: all.length,
+    totalKategori: umkmStore.getCategories().length,
+    totalProduk
+  }
+})
+
+const pageTitle = computed(() => {
+  const titles = {
+    dashboard: 'Dashboard Overview',
+    manage: 'Kelola UMKM',
+    categories: 'Kelola Kategori'
+  }
+  return titles[activeSection.value] || 'UMKM Admin'
+})
+
+const categoryDistribution = computed(() => {
+  const all = umkmStore.getAll()
+  const styles = {
+    Makanan: 'bg-[#FA6781]/15 text-[#FA6781]',
+    Minuman: 'bg-[#59B292]/15 text-[#59B292]',
+    Fashion: 'bg-[#FFC94D]/20 text-[#9a7600]',
+    Kerajinan: 'bg-[#FAE7CB] text-[#8a5f27]',
+    Jasa: 'bg-slate-100 text-slate-700'
+  }
+
+  return umkmStore.getCategories().map(cat => ({
+    name: cat,
+    count: all.filter(item => item.kategori === cat).length,
+    bgClass: styles[cat] || 'bg-gray-100 text-gray-600'
+  }))
+})
+
+const filteredUmkm = computed(() => {
+  let list = umkmStore.getAll()
+  if (filterCategory.value) {
+    list = list.filter(item => item.kategori === filterCategory.value)
+  }
+  if (searchQuery.value.trim()) {
+    const q = searchQuery.value.toLowerCase()
+    list = list.filter(item =>
+      item.namaUsaha.toLowerCase().includes(q) ||
+      item.namaPemilik.toLowerCase().includes(q) ||
+      item.kategori.toLowerCase().includes(q)
+    )
+  }
+  return list
+})
+
+function setSection(section) {
+  activeSection.value = section
+  sidebarOpen.value = false
+}
+
+function navButtonClass(section) {
+  return [
+    'w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200',
+    activeSection.value === section
+      ? 'bg-white/25 text-white shadow-sm font-semibold'
+      : 'text-white/80 hover:bg-white/10 hover:text-white'
+  ]
+}
+
+function categoryFilterClass(category) {
+  return [
+    'px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200',
+    filterCategory.value === category
+      ? 'bg-[#59B292] text-white shadow-sm'
+      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+  ]
+}
+
+function categoryBadgeClass(kategori) {
+  const map = {
+    Makanan: 'bg-orange-100 text-orange-700',
+    Minuman: 'bg-blue-100 text-blue-700',
+    Fashion: 'bg-yellow-100 text-yellow-800',
+    Kerajinan: 'bg-purple-100 text-purple-700',
+    Jasa: 'bg-slate-100 text-slate-700'
+  }
+  return map[kategori] || 'bg-gray-100 text-gray-700'
+}
+
+function resetForm() {
+  Object.assign(form, getEmptyForm())
+}
+
+function openAddModal() {
+  isEditing.value = false
+  editingId.value = null
+  resetForm()
+  showFormModal.value = true
+}
+
+function openEditModal(item) {
+  isEditing.value = true
+  editingId.value = item.id
+  Object.assign(form, {
+    namaUsaha: item.namaUsaha || '',
+    namaPemilik: item.namaPemilik || '',
+    kategori: item.kategori || '',
+    deskripsi: item.deskripsi || '',
+    alamat: item.alamat || '',
+    mapsEmbed: item.mapsEmbed || '',
+    kontak: {
+      telepon: item.kontak?.telepon || '',
+      whatsapp: item.kontak?.whatsapp || '',
+      instagram: item.kontak?.instagram || '',
+      email: item.kontak?.email || ''
+    },
+    jamOperasional: item.jamOperasional?.length
+      ? item.jamOperasional.map(jam => ({ ...jam }))
+      : [{ hari: '', jam: '' }],
+    produk: item.produk?.length
+      ? item.produk.map(produk => ({ ...produk }))
+      : [{ nama: '', harga: 0, deskripsi: '' }],
+    metodePembayaran: item.metodePembayaran ? [...item.metodePembayaran] : [],
+    foto: {
+      utama: item.foto?.utama || '',
+      tempat: item.foto?.tempat?.length ? [...item.foto.tempat] : [''],
+      produk: item.foto?.produk?.length ? [...item.foto.produk] : [''],
+      menu: item.foto?.menu || ''
+    }
+  })
+  showFormModal.value = true
+}
+
+function closeFormModal() {
+  showFormModal.value = false
+  setTimeout(resetForm, 300)
+}
+
+function addJamOperasional() {
+  form.jamOperasional.push({ hari: '', jam: '' })
+}
+
+function removeJamOperasional(index) {
+  if (form.jamOperasional.length > 1) {
+    form.jamOperasional.splice(index, 1)
+  }
+}
+
+function addProduk() {
+  form.produk.push({ nama: '', harga: 0, deskripsi: '' })
+}
+
+function removeProduk(index) {
+  if (form.produk.length > 1) {
+    form.produk.splice(index, 1)
+  }
+}
+
+function saveUmkm() {
+  if (!form.namaUsaha.trim() || !form.namaPemilik.trim() || !form.kategori) {
+    showToast('Mohon lengkapi field yang wajib diisi.', 'error')
+    return
+  }
+
+  const data = {
+    namaUsaha: form.namaUsaha.trim(),
+    namaPemilik: form.namaPemilik.trim(),
+    kategori: form.kategori,
+    deskripsi: form.deskripsi.trim(),
+    alamat: form.alamat.trim(),
+    mapsEmbed: normalizeMapEmbed(form.mapsEmbed.trim()),
+    kontak: { ...form.kontak },
+    jamOperasional: form.jamOperasional.filter(jam => jam.hari.trim() || jam.jam.trim()),
+    produk: form.produk.filter(produk => produk.nama.trim()),
+    metodePembayaran: [...form.metodePembayaran],
+    foto: {
+      utama: form.foto.utama || '',
+      tempat: form.foto.tempat.filter(url => url.trim()),
+      produk: form.foto.produk.filter(url => url.trim()),
+      menu: form.foto.menu || null
+    }
+  }
+
+  if (!data.jamOperasional.length) data.jamOperasional = [{ hari: '', jam: '' }]
+
+  if (isEditing.value) {
+    umkmStore.update(editingId.value, data)
+    showToast('UMKM berhasil diperbarui.')
+  } else {
+    umkmStore.add(data)
+    showToast('UMKM baru berhasil ditambahkan.')
+  }
+
+  closeFormModal()
+}
+
+function openDeleteModal(item) {
+  deleteTarget.value = item
+  showDeleteModal.value = true
+}
+
+function confirmDelete() {
+  if (deleteTarget.value) {
+    umkmStore.delete(deleteTarget.value.id)
+    showToast('UMKM berhasil dihapus.')
+  }
+  showDeleteModal.value = false
+  deleteTarget.value = null
+}
+
+function showToast(message, type = 'success') {
+  toast.show = true
+  toast.message = message
+  toast.type = type
+  setTimeout(() => { toast.show = false }, 3000)
+}
+
+function categoryUsage(category) {
+  return umkmStore.getAll().filter(item => item.kategori === category).length
+}
+
+function startEditCategory(category) {
+  editingCategory.value = category
+  categoryFormName.value = category
+}
+
+function cancelCategoryEdit() {
+  editingCategory.value = ''
+  categoryFormName.value = ''
+}
+
+function saveCategory() {
+  if (!categoryFormName.value.trim()) {
+    showToast('Nama kategori wajib diisi.', 'error')
+    return
+  }
+
+  let ok = false
+  if (editingCategory.value) {
+    ok = umkmStore.updateCategory(editingCategory.value, categoryFormName.value)
+    showToast(ok ? 'Kategori berhasil diperbarui.' : 'Kategori sudah ada atau tidak valid.', ok ? 'success' : 'error')
+  } else {
+    ok = umkmStore.addCategory(categoryFormName.value)
+    showToast(ok ? 'Kategori berhasil ditambahkan.' : 'Kategori sudah ada atau tidak valid.', ok ? 'success' : 'error')
+  }
+
+  if (ok) cancelCategoryEdit()
+}
+
+function removeCategory(category) {
+  const removed = umkmStore.deleteCategory(category)
+  showToast(removed ? 'Kategori berhasil dihapus.' : 'Kategori masih dipakai UMKM.', removed ? 'success' : 'error')
+  if (editingCategory.value === category) cancelCategoryEdit()
+}
+
+function normalizeMapEmbed(value) {
+  const input = (value || '').trim()
+  if (!input) return ''
+
+  const iframeSrc = input.match(/src=["']([^"']+)["']/i)?.[1]
+  const raw = (iframeSrc || input).replace(/&amp;/g, '&')
+
+  if (/^https:\/\/(www\.)?google\.[^/]+\/maps\/embed/i.test(raw) || /^https:\/\/maps\.google\.[^/]+\/maps/i.test(raw)) {
+    return raw
+  }
+
+  const coords = raw.match(/(-?\d{1,2}\.\d+)\s*,\s*(-?\d{1,3}\.\d+)/)
+  if (coords) {
+    return `https://www.google.com/maps?q=${coords[1]},${coords[2]}&output=embed`
+  }
+
+  try {
+    const url = new URL(raw)
+    if (url.hostname.includes('google.') || url.hostname === 'maps.app.goo.gl') {
+      const query = url.searchParams.get('q') || url.searchParams.get('query')
+      return `https://www.google.com/maps?q=${encodeURIComponent(query || raw)}&output=embed`
+    }
+  } catch {
+    // Plain text is treated as an address.
+  }
+
+  return `https://www.google.com/maps?q=${encodeURIComponent(raw)}&output=embed`
+}
+
+function logout() {
+  sessionStorage.removeItem('umkm-admin-auth')
+  sessionStorage.removeItem('umkm-admin-email')
+  router.replace({ name: 'AdminLogin' })
+}
+
+function checkMobile() {
+  isMobile.value = window.innerWidth < 1024
+  if (!isMobile.value) sidebarOpen.value = false
+}
+
+onMounted(() => {
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkMobile)
+})
+
+function createSvgIcon(path, extra = {}) {
+  return defineComponent({
+    setup() {
+      return () => h('span', { class: 'legend-icon' }, [
+        h('svg', {
+          class: 'w-4 h-4',
+          fill: 'none',
+          stroke: 'currentColor',
+          viewBox: '0 0 24 24',
+          ...extra
+        }, [
+          h('path', {
+            'stroke-linecap': 'round',
+            'stroke-linejoin': 'round',
+            'stroke-width': '2',
+            d: path
+          })
+        ])
+      ])
+    }
+  })
+}
+
+const IconInfo = createSvgIcon('M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z')
+const IconPhone = createSvgIcon('M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.4 19.4 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.7.6 2.5a2 2 0 0 1-.5 2.1L8 9.5a16 16 0 0 0 6.5 6.5l1.2-1.2a2 2 0 0 1 2.1-.5c.8.3 1.6.5 2.5.6a2 2 0 0 1 1.7 2Z')
+const IconClock = createSvgIcon('M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z')
+const IconBox = createSvgIcon('M21 8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7V8Z')
+const IconCard = createSvgIcon('M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 0 0 3-3V8a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3Z')
+const IconImage = createSvgIcon('M4 16l4.6-4.6a2 2 0 0 1 2.8 0L16 16m-2-2 1.6-1.6a2 2 0 0 1 2.8 0L20 14m-6-6h.01M6 20h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z')
+const IconPlus = createSvgIcon('M12 4v16m8-8H4')
+const IconTrash = createSvgIcon('m19 7-.9 12.1A2 2 0 0 1 16.1 21H7.9a2 2 0 0 1-2-1.9L5 7m5 4v6m4-6v6m1-10V4a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v3M4 7h16')
+
+const UrlList = defineComponent({
+  props: {
+    modelValue: {
+      type: Array,
+      default: () => []
+    },
+    label: {
+      type: String,
+      required: true
+    }
+  },
+  emits: ['update:modelValue'],
+  setup(props, { emit }) {
+    const updateAt = (index, value) => {
+      const next = [...props.modelValue]
+      next[index] = value
+      emit('update:modelValue', next)
+    }
+    const removeAt = (index) => {
+      const next = props.modelValue.filter((_, i) => i !== index)
+      emit('update:modelValue', next.length ? next : [''])
+    }
+    const addItem = () => emit('update:modelValue', [...props.modelValue, ''])
+
+    return () => h('div', { class: 'space-y-2' }, [
+      h('label', { class: 'form-label' }, props.label),
+      ...props.modelValue.map((url, index) => h('div', { class: 'flex gap-2', key: index }, [
+        h('input', {
+          value: url,
+          type: 'url',
+          class: 'form-input flex-1',
+          placeholder: 'https://example.com/foto.jpg',
+          onInput: event => updateAt(index, event.target.value)
+        }),
+        h('button', {
+          type: 'button',
+          class: 'icon-action text-[#FA6781] hover:bg-[#FA6781]/10',
+          onClick: () => removeAt(index)
+        }, [h(IconTrash)])
+      ])),
+      h('button', {
+        type: 'button',
+        class: 'add-inline-button',
+        onClick: addItem
+      }, [h(IconPlus), `Tambah ${props.label}`])
+    ])
+  }
+})
+</script>
+
+<style>
+.stat-card {
+  background: white;
+  border: 1px solid #f3f4f6;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+  transition: box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  box-shadow: 0 8px 24px rgb(15 23 42 / 0.08);
+}
+
+.stat-icon,
+.legend-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.legend-icon {
+  width: 2rem;
+  height: 2rem;
+  background: rgb(89 178 146 / 0.1);
+  color: #59B292;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.625rem 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  background-color: white;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.form-input::placeholder {
+  color: #9ca3af;
+}
+
+.form-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(89, 178, 146, 0.4);
+  border-color: #59B292;
+}
+
+.admin-search-input {
+  padding-left: 2.75rem !important;
+}
+
+.form-label {
+  display: block;
+  color: #4b5563;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.375rem;
+}
+
+.form-legend {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #374151;
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.icon-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.icon-action .legend-icon,
+.add-inline-button .legend-icon {
+  width: 1rem;
+  height: 1rem;
+  background: transparent;
+  color: currentColor;
+}
+
+.add-inline-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #59B292;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.add-inline-button:hover {
+  color: #478f76;
+}
+
+.slide-enter-active,
+.slide-leave-active {
+  transition: transform 0.3s ease;
+}
+
+.slide-enter-from,
+.slide-leave-to {
+  transform: translateX(-100%);
+}
+
+.fade-enter-active,
+.fade-leave-active,
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to,
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-active > div:last-child,
+.modal-leave-active > div:last-child {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.modal-enter-from > div:last-child,
+.modal-leave-to > div:last-child {
+  transform: scale(0.95) translateY(10px);
+  opacity: 0;
+}
+
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 0.4s ease;
+}
+
+.toast-enter-from {
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+}
+
+.toast-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+  border-radius: 3px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background-color: #9ca3af;
+}
+</style>

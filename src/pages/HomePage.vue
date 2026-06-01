@@ -1,0 +1,365 @@
+<template>
+  <div>
+    <section class="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 pb-10">
+      <div class="absolute inset-0 bg-gradient-to-br from-cream-light via-white to-cream"></div>
+
+      <div class="relative w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="rounded-3xl p-7 sm:p-10 lg:p-16 xl:p-20 lg:min-h-[calc(100vh-7rem)] lg:flex lg:flex-col lg:justify-center">
+          <div class="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-semibold mb-6 mx-auto">
+            <span class="w-2 h-2 rounded-full bg-primary"></span>
+            E-Catalog UMKM Indonesia
+          </div>
+
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-tight mb-6">
+            <span class="text-gray-900">Temukan </span>
+            <span class="gradient-text">UMKM Terbaik</span>
+            <br />
+            <span class="text-gray-900">di Sekitarmu</span>
+          </h1>
+
+          <p class="text-gray-500 text-lg sm:text-xl max-w-3xl mx-auto mb-10 leading-relaxed">
+            Jelajahi usaha mikro, kecil, dan menengah lokal dari kuliner, fashion, kerajinan, minuman, sampai jasa harian.
+          </p>
+
+          <div
+            class="max-w-3xl mx-auto mb-6 transition-all duration-500 ease-out"
+            :class="searchState.docked ? 'opacity-0 -translate-y-4 scale-95 pointer-events-none' : 'opacity-100 translate-y-0 scale-100'"
+          >
+            <form class="relative group" @submit.prevent="handleSearch">
+              <div class="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-coral rounded-2xl opacity-20 group-hover:opacity-40 blur-lg transition-opacity duration-500"></div>
+              <div class="relative flex items-center bg-white rounded-2xl shadow-lg">
+                <div class="pl-5 pr-2 text-gray-400">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" />
+                  </svg>
+                </div>
+                <input
+                  v-model="searchState.query"
+                  type="text"
+                  placeholder="Cari UMKM, produk, atau kategori..."
+                  class="flex-1 py-4 px-3 bg-transparent text-gray-800 placeholder-gray-400 focus:outline-none text-base sm:text-lg min-w-0"
+                />
+                <button
+                  v-if="searchState.query"
+                  type="button"
+                  @click="searchState.query = ''"
+                  class="p-2 mr-1 text-gray-400 hover:text-gray-600 transition-colors"
+                  aria-label="Kosongkan pencarian"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button
+              @click="handleSearch"
+              class="w-full sm:w-auto px-8 py-4 rounded-xl font-bold text-white text-base bg-gradient-to-r from-primary to-primary-dark hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-1 active:translate-y-0 transition-all duration-300 flex items-center justify-center gap-2"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" />
+              </svg>
+              Cari UMKM
+            </button>
+            <button
+              @click="handleFeelingLucky"
+              :disabled="luckyLoading"
+              class="w-full sm:w-auto sm:min-w-60 px-8 py-4 rounded-xl font-bold text-base bg-gradient-to-r from-accent to-accent-dark text-gray-800 hover:shadow-xl hover:shadow-accent/30 hover:-translate-y-1 active:translate-y-0 transition-all duration-300 flex items-center justify-center gap-2 disabled:cursor-wait disabled:hover:translate-y-0"
+            >
+              <svg v-if="luckyLoading" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4Z" />
+              </svg>
+              <CategoryIcon v-else name="Makanan" class="w-5 h-5" />
+              {{ luckyLoading ? luckyText : "I'm feeling lucky" }}
+            </button>
+          </div>
+
+          <div class="mt-8 flex flex-wrap items-center justify-center gap-2">
+            <span class="text-gray-400 text-sm mr-1">Populer:</span>
+            <button
+              v-for="cat in popularCategories"
+              :key="cat"
+              @click="searchByCategory(cat)"
+              class="px-4 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 border-gray-200 text-gray-500 hover:border-primary hover:text-primary hover:bg-primary/5"
+            >
+              {{ cat }}
+            </button>
+          </div>
+
+          <div class="grid grid-cols-3 gap-4 sm:gap-8 mt-12">
+            <div class="text-center">
+              <p class="text-2xl sm:text-3xl font-extrabold text-primary">{{ totalUmkm }}+</p>
+              <p class="text-gray-400 text-xs sm:text-sm mt-1">UMKM Terdaftar</p>
+            </div>
+            <div class="text-center">
+              <p class="text-2xl sm:text-3xl font-extrabold text-accent-dark">{{ totalKategori }}</p>
+              <p class="text-gray-400 text-xs sm:text-sm mt-1">Kategori</p>
+            </div>
+            <div class="text-center">
+              <p class="text-2xl sm:text-3xl font-extrabold text-coral">{{ totalProduk }}+</p>
+              <p class="text-gray-400 text-xs sm:text-sm mt-1">Produk</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="py-20 bg-white relative">
+      <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+          <span class="inline-block px-4 py-1.5 bg-primary/10 text-primary text-sm font-semibold rounded-full mb-4">
+            Kategori
+          </span>
+          <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900">
+            Jelajahi Berdasarkan Kategori
+          </h2>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+          <button
+            v-for="cat in categoryCards"
+            :key="cat.name"
+            @click="searchByCategory(cat.name)"
+            class="group relative overflow-hidden rounded-2xl p-6 sm:p-8 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2"
+            :class="cat.bgClass"
+          >
+            <CategoryIcon :name="cat.name" class="w-11 h-11 sm:w-12 sm:h-12 mx-auto mb-4 transition-transform duration-300 group-hover:scale-110" />
+            <h3 class="font-bold text-lg text-gray-800">{{ cat.name }}</h3>
+            <p class="text-sm text-gray-500 mt-1">{{ cat.count }} UMKM</p>
+            <div class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/50 flex items-center justify-center opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-300">
+              <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="py-20 bg-gradient-to-b from-white to-cream-light relative">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-12 gap-4">
+          <div>
+            <span class="inline-block px-4 py-1.5 bg-accent/20 text-accent-dark text-sm font-semibold rounded-full mb-4">
+              UMKM Pilihan
+            </span>
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900">
+              UMKM Terpopuler
+            </h2>
+            <p class="text-gray-500 mt-2">Temukan UMKM lokal yang paling banyak dikunjungi</p>
+          </div>
+          <router-link
+            to="/search"
+            class="px-6 py-3 rounded-xl border-2 border-primary text-primary font-semibold text-sm hover:bg-primary hover:text-white transition-all duration-300 flex items-center gap-2 shrink-0"
+          >
+            Lihat Semua
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0-4 4m4-4H3" />
+            </svg>
+          </router-link>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <router-link
+            v-for="umkm in displayedUmkm"
+            :key="umkm.id"
+            :to="{ name: 'UmkmDetail', params: { id: umkm.id } }"
+            class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 hover:-translate-y-2 card-hover"
+          >
+            <div class="relative h-48 overflow-hidden">
+              <img
+                :src="umkm.foto.utama"
+                :alt="umkm.namaUsaha"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                loading="lazy"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+              <div class="absolute top-3 left-3">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold shadow-lg" :class="getCategoryColor(umkm.kategori)">
+                  <CategoryIcon :name="umkm.kategori" class="w-3.5 h-3.5" />
+                  {{ umkm.kategori }}
+                </span>
+              </div>
+            </div>
+
+            <div class="p-5">
+              <h3 class="font-bold text-gray-900 text-base mb-1 group-hover:text-primary transition-colors line-clamp-1">
+                {{ umkm.namaUsaha }}
+              </h3>
+              <p class="text-gray-400 text-sm mb-3 flex items-center gap-1">
+                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM12 14a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7Z" />
+                </svg>
+                {{ umkm.namaPemilik }}
+              </p>
+              <p class="text-gray-500 text-sm leading-relaxed line-clamp-2 mb-4">
+                {{ umkm.deskripsi }}
+              </p>
+
+              <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                <div class="flex items-center gap-1 text-xs text-gray-400 min-w-0">
+                  <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11Z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10.5h.01" />
+                  </svg>
+                  <span class="line-clamp-1">{{ getCity(umkm.alamat) }}</span>
+                </div>
+                <span class="text-primary text-xs font-semibold flex items-center gap-1 group-hover:gap-2 transition-all duration-300">
+                  Detail
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </span>
+              </div>
+            </div>
+          </router-link>
+        </div>
+
+        <div v-if="displayedUmkm.length < allUmkm.length" class="text-center mt-12">
+          <button
+            @click="loadMore"
+            class="px-8 py-3 rounded-xl border-2 border-gray-200 text-gray-600 font-semibold text-sm hover:border-primary hover:text-primary hover:bg-primary/5 transition-all duration-300"
+          >
+            Lihat Lebih Banyak
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+import CategoryIcon from '../components/CategoryIcon.vue'
+import { umkmStore, getCategoryColor } from '../data/umkmData'
+import { homeSearchState } from '../stores/uiState'
+
+const router = useRouter()
+const searchState = homeSearchState
+const itemsToShow = ref(8)
+const luckyLoading = ref(false)
+const luckyText = ref("ayam goreng...")
+let luckyInterval = null
+let luckyTimeout = null
+
+const allUmkm = computed(() => umkmStore.getAll())
+const displayedUmkm = computed(() => allUmkm.value.slice(0, itemsToShow.value))
+const totalUmkm = computed(() => allUmkm.value.length)
+const totalKategori = computed(() => umkmStore.getCategories().length)
+const totalProduk = computed(() => allUmkm.value.reduce((sum, u) => sum + (u.produk?.length || 0), 0))
+
+const popularCategories = ['Makanan', 'Minuman', 'Jasa']
+const luckyTexts = [
+  'ayam goreng...',
+  'manggil abang nasi goreng...',
+  'faiz sussy...',
+  'spinner lagi mikir keras...',
+  'sabar, server lagi healing...',
+  'lagi nyari wangsit...',
+  'minum es teh dulu bentar...',
+  'sistem lagi rebahan...',
+  'nunggu hilal UMKM...',
+  'ngaduk kopi dulu...',
+  'ngetik mantra pencarian...',
+  'otw cari yang paling mantap...',
+  'tahan napas, bentar lagi dapet...',
+  'ngajak ngobrol server...',
+  'lagi nanya tetangga sebelah...'
+]
+
+const categoryCards = computed(() => [
+  {
+    name: 'Makanan',
+    count: umkmStore.getByCategory('Makanan').length,
+    bgClass: 'bg-gradient-to-br from-coral/10 to-coral/5 hover:from-coral/20 hover:to-coral/10 text-coral'
+  },
+  {
+    name: 'Minuman',
+    count: umkmStore.getByCategory('Minuman').length,
+    bgClass: 'bg-gradient-to-br from-primary/10 to-primary/5 hover:from-primary/20 hover:to-primary/10 text-primary'
+  },
+  {
+    name: 'Jasa',
+    count: umkmStore.getByCategory('Jasa').length,
+    bgClass: 'bg-gradient-to-br from-slate-100 to-slate-50 hover:from-slate-200 hover:to-slate-100 text-slate-700'
+  }
+])
+
+const getCity = (alamat) => {
+  const parts = alamat.split(',')
+  return parts[parts.length - 1]?.trim() || alamat
+}
+
+const handleSearch = () => {
+  const q = searchState.query.trim()
+  router.push({ name: 'SearchResult', query: q ? { q } : {} })
+}
+
+const handleFeelingLucky = () => {
+  if (luckyLoading.value) return
+  luckyLoading.value = true
+  luckyText.value = luckyTexts[Math.floor(Math.random() * luckyTexts.length)]
+
+  luckyInterval = window.setInterval(() => {
+    luckyText.value = luckyTexts[Math.floor(Math.random() * luckyTexts.length)]
+  }, 700)
+
+  luckyTimeout = window.setTimeout(() => {
+    window.clearInterval(luckyInterval)
+    luckyInterval = null
+    luckyLoading.value = false
+    const randomUmkm = umkmStore.getRandom(['Makanan', 'Minuman'])
+    if (randomUmkm) {
+      router.push({ name: 'UmkmDetail', params: { id: randomUmkm.id } })
+    }
+  }, 3000)
+}
+
+const searchByCategory = (category) => {
+  router.push({ name: 'SearchResult', query: { q: category } })
+}
+
+const loadMore = () => {
+  itemsToShow.value += 4
+}
+
+const handleScroll = () => {
+  searchState.docked = window.innerWidth >= 1024 && window.scrollY > 360
+}
+
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll, { passive: true })
+  window.addEventListener('resize', handleScroll)
+  handleScroll()
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+  window.removeEventListener('resize', handleScroll)
+  if (luckyInterval) window.clearInterval(luckyInterval)
+  if (luckyTimeout) window.clearTimeout(luckyTimeout)
+  searchState.docked = false
+})
+</script>
+
+<style scoped>
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+</style>
