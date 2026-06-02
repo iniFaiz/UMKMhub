@@ -2,13 +2,35 @@
 import { useRoute, useRouter } from 'vue-router'
 import { umkmStore, getCategoryStyle } from '../data/umkmData'
 import CategoryIcon from '../components/CategoryIcon.vue'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 const route = useRoute()
 const router = useRouter()
 
 const query = computed(() => route.query.q || '')
 const searchInput = ref('')
+const easterEggClass = ref('')
+
+watch(query, (newQuery) => {
+  const q = (newQuery || '').trim().toLowerCase()
+  if (q === '67' || q === '6-7' || q === 'six seven') {
+    easterEggClass.value = 'animate-egg-67'
+    setTimeout(() => {
+      if (easterEggClass.value === 'animate-egg-67') {
+        easterEggClass.value = ''
+      }
+    }, 4000)
+  } else if (q === 'do a barrel roll') {
+    easterEggClass.value = 'animate-barrel-roll'
+    setTimeout(() => {
+      if (easterEggClass.value === 'animate-barrel-roll') {
+        easterEggClass.value = ''
+      }
+    }, 4000)
+  } else {
+    easterEggClass.value = ''
+  }
+}, { immediate: true })
 const selectedCategory = ref('Semua')
 const sortBy = ref('nama-az')
 
@@ -65,7 +87,10 @@ function truncate(text, maxLength = 100) {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-[#FAE7CB]/30 via-white to-[#59B292]/5 dark:from-[#13100a] dark:via-[#0c0e14] dark:to-[#07130f] pt-16 lg:pt-20 transition-colors duration-300">
+  <div 
+    class="min-h-screen bg-gradient-to-br from-[#FAE7CB]/30 via-white to-[#59B292]/5 dark:from-[#13100a] dark:via-[#0c0e14] dark:to-[#07130f] pt-16 lg:pt-20 transition-colors duration-300"
+    :class="easterEggClass"
+  >
     <header class="bg-white/80 dark:bg-[#0c0e14]/80 backdrop-blur-md border-b border-[#59B292]/10 dark:border-white/5 transition-colors duration-300">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5">
         <div class="flex items-start sm:items-center gap-3 mb-4">
@@ -252,6 +277,58 @@ function truncate(text, maxLength = 100) {
 </template>
 
 <style scoped>
+@keyframes egg67 {
+  0%, 100% {
+    transform: rotate(0deg) translateY(0);
+  }
+  10% {
+    transform: rotate(1.5deg) translateY(-8px);
+  }
+  20% {
+    transform: rotate(-1.5deg) translateY(8px);
+  }
+  30% {
+    transform: rotate(1.5deg) translateY(-8px);
+  }
+  40% {
+    transform: rotate(-1.5deg) translateY(8px);
+  }
+  50% {
+    transform: rotate(1deg) translateY(-4px);
+  }
+  60% {
+    transform: rotate(-1deg) translateY(4px);
+  }
+  70% {
+    transform: rotate(0.5deg) translateY(-2px);
+  }
+  80% {
+    transform: rotate(-0.5deg) translateY(2px);
+  }
+  90% {
+    transform: rotate(0deg) translateY(0);
+  }
+}
+
+@keyframes barrelRoll {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-egg-67 {
+  animation: egg67 4s ease-in-out;
+  transform-origin: center center;
+}
+
+.animate-barrel-roll {
+  animation: barrelRoll 2.5s cubic-bezier(0.25, 1, 0.5, 1);
+  transform-origin: center center;
+}
+
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;

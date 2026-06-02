@@ -6,3 +6,5 @@ import './style.css'
 const app = createApp(App)
 app.use(router)
 app.mount('#app')
+
+console.log("%c[ALERT] You have reached the final boss of the neighborhood network. The Ketua RT has been notified of your curiosity.", "color: #fff; background: linear-gradient(to right, #ff0000, #990000); font-size: 14px; padding: 8px;");

@@ -7,7 +7,13 @@
         <div class="rounded-3xl p-7 sm:p-10 lg:p-16 xl:p-20 lg:min-h-[calc(100vh-7rem)] lg:flex lg:flex-col lg:justify-center">
           <h1 class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-tight mb-6">
             <span class="text-gray-900 dark:text-white transition-colors duration-300">Temukan </span>
-            <span class="gradient-text">UMKM Terbaik</span>
+            <span
+              @click="handleEasterEgg"
+              class="gradient-text cursor-pointer select-none active:scale-95 inline-block transition-transform duration-100"
+              title="Easter Egg! Klik 3 kali"
+            >
+              UMKM Terbaik
+            </span>
             <br />
             <span class="text-gray-900 dark:text-white transition-colors duration-300">di Sekitarmu</span>
           </h1>
@@ -258,6 +264,61 @@ const luckyLoading = ref(false)
 const luckyText = ref("ayam goreng...")
 let luckyInterval = null
 let luckyTimeout = null
+
+const easterEggClicks = ref(0)
+
+const handleEasterEgg = () => {
+  easterEggClicks.value++
+  if (easterEggClicks.value >= 6) {
+    easterEggClicks.value = 0
+    triggerThumbsUpBurst()
+  }
+}
+
+const triggerThumbsUpBurst = () => {
+  const emojiCount = 35
+  const container = document.createElement('div')
+  container.style.position = 'fixed'
+  container.style.inset = '0'
+  container.style.pointerEvents = 'none'
+  container.style.zIndex = '9999'
+  document.body.appendChild(container)
+
+  for (let i = 0; i < emojiCount; i++) {
+    const emoji = document.createElement('span')
+    emoji.innerText = '👍'
+    emoji.style.position = 'absolute'
+    
+    const startX = Math.random() * 100
+    emoji.style.left = `${startX}vw`
+    emoji.style.top = `100vh`
+    
+    const scale = 0.5 + Math.random() * 1.5
+    const duration = 1.5 + Math.random() * 2
+    const delay = Math.random() * 0.5
+    const wobble = -100 + Math.random() * 200
+    const rotate = -45 + Math.random() * 90
+    
+    emoji.style.fontSize = `${24 * scale}px`
+    emoji.style.filter = 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))'
+    emoji.style.opacity = '0'
+    emoji.style.transition = `all ${duration}s cubic-bezier(0.25, 1, 0.5, 1) ${delay}s`
+    
+    container.appendChild(emoji)
+    
+    setTimeout(() => {
+      emoji.style.opacity = '1'
+      emoji.style.transform = `translate(${wobble}px, -110vh) rotate(${rotate}deg)`
+      setTimeout(() => {
+        emoji.style.opacity = '0'
+      }, (duration - 0.8) * 1000)
+    }, 50)
+  }
+
+  setTimeout(() => {
+    container.remove()
+  }, 4500)
+}
 
 const allUmkm = computed(() => umkmStore.getAll())
 const displayedUmkm = computed(() => allUmkm.value.slice(0, itemsToShow.value))
