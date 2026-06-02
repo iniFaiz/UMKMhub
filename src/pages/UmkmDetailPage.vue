@@ -45,7 +45,10 @@
 
       <div class="absolute bottom-0 left-0 right-0 z-10 p-6 md:p-10 lg:p-14">
         <div class="max-w-6xl mx-auto">
-          <span :class="['inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold mb-4 shadow-lg', getCategoryColor(umkm.kategori)]">
+          <span
+            class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold mb-4 shadow-lg transition-all duration-300"
+            :style="getCategoryStyle(umkm.kategori)"
+          >
             <CategoryIcon :name="umkm.kategori" class="w-4 h-4" />
             {{ umkm.kategori }}
           </span>
@@ -424,7 +427,10 @@
               />
             </div>
             <div class="p-3 sm:p-4">
-              <p :class="['inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold mb-1.5 sm:mb-2', getCategoryLightColor(item.kategori)]">
+              <p
+                class="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold mb-1.5 sm:mb-2 transition-all duration-300"
+                :style="getCategoryLightStyle(item.kategori)"
+              >
                 <CategoryIcon :name="item.kategori" class="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 <span class="hidden sm:inline">{{ item.kategori }}</span>
               </p>
@@ -592,7 +598,7 @@
 import { useRoute, useRouter } from 'vue-router'
 import { computed, ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import CategoryIcon from '../components/CategoryIcon.vue'
-import { umkmStore, getCategoryColor, getCategoryLightColor } from '../data/umkmData'
+import { umkmStore, getCategoryStyle, getCategoryLightStyle } from '../data/umkmData'
 
 const route = useRoute()
 const router = useRouter()

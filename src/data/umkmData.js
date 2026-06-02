@@ -1,8 +1,23 @@
 import { reactive } from 'vue'
 
+// Default categories configuration
+const defaultCategories = [
+  { name: 'Makanan', icon: 'utensils', color: '#FA6781' },
+  { name: 'Minuman', icon: 'coffee', color: '#59B292' },
+  { name: 'Fashion', icon: 'shirt', color: '#FFC94D' },
+  { name: 'Kerajinan', icon: 'palette', color: '#E0A96D' },
+  { name: 'Jasa', icon: 'wrench', color: '#4A5568' }
+]
+
+const storedCategories = localStorage.getItem('umkm-categories')
+const initialCategories = storedCategories ? JSON.parse(storedCategories) : defaultCategories
+if (!storedCategories) {
+  localStorage.setItem('umkm-categories', JSON.stringify(defaultCategories))
+}
+
 // Reactive store for UMKM data
 export const umkmStore = reactive({
-  categories: ['Makanan', 'Minuman', 'Fashion', 'Kerajinan', 'Jasa'],
+  categoriesList: initialCategories,
   reports: JSON.parse(localStorage.getItem('umkm-reports') || '[]'),
   umkmList: [
     {
@@ -427,36 +442,46 @@ export const umkmStore = reactive({
 
   // Get all categories
   getCategories() {
-    return [...new Set([...this.categories, ...this.umkmList.map(u => u.kategori)])]
+    return this.categoriesList.map(c => c.name)
   },
 
-  addCategory(name) {
-    const cleanName = name.trim()
-    if (!cleanName || this.getCategories().some(cat => cat.toLowerCase() === cleanName.toLowerCase())) {
+  addCategory(catObj) {
+    const cleanName = catObj.name.trim()
+    if (!cleanName || this.categoriesList.some(c => c.name.toLowerCase() === cleanName.toLowerCase())) {
       return false
     }
-    this.categories.push(cleanName)
-    return true
-  },
-
-  updateCategory(oldName, newName) {
-    const cleanName = newName.trim()
-    if (!cleanName || oldName === cleanName) return false
-    if (this.getCategories().some(cat => cat !== oldName && cat.toLowerCase() === cleanName.toLowerCase())) {
-      return false
-    }
-
-    const index = this.categories.findIndex(cat => cat === oldName)
-    if (index !== -1) {
-      this.categories[index] = cleanName
-    } else {
-      this.categories.push(cleanName)
-    }
-
-    this.umkmList.forEach((u) => {
-      if (u.kategori === oldName) u.kategori = cleanName
+    this.categoriesList.push({
+      name: cleanName,
+      icon: catObj.icon || 'grid',
+      color: catObj.color || '#59B292'
     })
+    localStorage.setItem('umkm-categories', JSON.stringify(this.categoriesList))
     return true
+  },
+
+  updateCategory(oldName, catObj) {
+    const cleanName = catObj.name.trim()
+    if (!cleanName) return false
+    if (this.categoriesList.some(c => c.name !== oldName && c.name.toLowerCase() === cleanName.toLowerCase())) {
+      return false
+    }
+
+    const index = this.categoriesList.findIndex(c => c.name === oldName)
+    if (index !== -1) {
+      this.categoriesList[index] = {
+        name: cleanName,
+        icon: catObj.icon || 'grid',
+        color: catObj.color || '#59B292'
+      }
+
+      this.umkmList.forEach((u) => {
+        if (u.kategori === oldName) u.kategori = cleanName
+      })
+
+      localStorage.setItem('umkm-categories', JSON.stringify(this.categoriesList))
+      return true
+    }
+    return false
   },
 
   deleteCategory(name) {
@@ -464,9 +489,10 @@ export const umkmStore = reactive({
       return false
     }
 
-    const index = this.categories.findIndex(cat => cat === name)
+    const index = this.categoriesList.findIndex(c => c.name === name)
     if (index !== -1) {
-      this.categories.splice(index, 1)
+      this.categoriesList.splice(index, 1)
+      localStorage.setItem('umkm-categories', JSON.stringify(this.categoriesList))
       return true
     }
     return false
@@ -539,6 +565,36 @@ export const umkmStore = reactive({
     return false
   }
 })
+
+function getContrastColor(hex) {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000
+  return (yiq >= 128) ? '#1F2937' : '#FFFFFF'
+}
+
+export const getCategoryStyle = (kategori, isDarkTheme = false) => {
+  const cat = umkmStore.categoriesList?.find(c => c.name === kategori)
+  const hex = cat ? cat.color : '#9CA3AF'
+  return {
+    backgroundColor: hex,
+    color: getContrastColor(hex)
+  }
+}
+
+export const getCategoryLightStyle = (kategori, isDarkTheme = false) => {
+  const cat = umkmStore.categoriesList?.find(c => c.name === kategori)
+  const hex = cat ? cat.color : '#9CA3AF'
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  const alpha = isDarkTheme ? 0.25 : 0.12
+  return {
+    backgroundColor: `rgba(${r}, ${g}, ${b}, ${alpha})`,
+    color: hex
+  }
+}
 
 export const getCategoryColor = (kategori) => {
   const colors = {

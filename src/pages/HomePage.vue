@@ -121,17 +121,24 @@
           </h2>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
           <button
             v-for="cat in categoryCards"
             :key="cat.name"
             @click="searchByCategory(cat.name)"
-            class="group relative overflow-hidden rounded-2xl p-6 sm:p-8 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2"
-            :class="cat.bgClass"
+            class="group relative overflow-hidden rounded-2xl p-6 sm:p-8 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 border border-transparent dark:border-white/5"
+            :style="{
+              background: `linear-gradient(135deg, ${cat.color}15, ${cat.color}05)`,
+              color: cat.color
+            }"
+            @mouseenter="e => e.currentTarget.style.boxShadow = `0 20px 40px ${cat.color}15`"
+            @mouseleave="e => e.currentTarget.style.boxShadow = 'none'"
           >
             <CategoryIcon :name="cat.name" class="w-11 h-11 sm:w-12 sm:h-12 mx-auto mb-4 transition-transform duration-300 group-hover:scale-110" />
             <h3 class="font-bold text-lg text-gray-800 dark:text-gray-200">{{ cat.name }}</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 transition-colors duration-300">{{ cat.count }} UMKM</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 transition-colors duration-300">
+              {{ cat.name === 'Lainnya' ? 'Lihat Semua' : `${cat.count} UMKM` }}
+            </p>
             <div class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/50 dark:bg-black/35 flex items-center justify-center opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-300">
               <svg class="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -181,7 +188,10 @@
               />
               <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
               <div class="absolute top-2 left-2 sm:top-3 sm:left-3">
-                <span class="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold shadow-lg" :class="getCategoryColor(umkm.kategori)">
+                <span
+                  class="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold shadow-lg"
+                  :style="getCategoryStyle(umkm.kategori)"
+                >
                   <CategoryIcon :name="umkm.kategori" class="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                   <span class="hidden sm:inline">{{ umkm.kategori }}</span>
                 </span>
@@ -238,7 +248,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import CategoryIcon from '../components/CategoryIcon.vue'
-import { umkmStore, getCategoryColor } from '../data/umkmData'
+import { umkmStore, getCategoryStyle } from '../data/umkmData'
 import { homeSearchState } from '../stores/uiState'
 
 const router = useRouter()
@@ -274,23 +284,29 @@ const luckyTexts = [
   'lagi nanya tetangga sebelah...'
 ]
 
-const categoryCards = computed(() => [
-  {
-    name: 'Makanan',
-    count: umkmStore.getByCategory('Makanan').length,
-    bgClass: 'bg-gradient-to-br from-coral/10 to-coral/5 dark:from-coral/20 dark:to-coral/5 hover:from-coral/20 hover:to-coral/10 dark:hover:from-coral/25 dark:hover:to-coral/10 text-coral'
-  },
-  {
-    name: 'Minuman',
-    count: umkmStore.getByCategory('Minuman').length,
-    bgClass: 'bg-gradient-to-br from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/5 hover:from-primary/20 hover:to-primary/10 dark:hover:from-primary/25 dark:hover:to-primary/10 text-primary'
-  },
-  {
-    name: 'Jasa',
-    count: umkmStore.getByCategory('Jasa').length,
-    bgClass: 'bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-800/50 dark:to-slate-900/50 hover:from-slate-200 hover:to-slate-100 dark:hover:from-slate-800 dark:hover:to-slate-900 text-slate-700 dark:text-slate-300 border border-transparent dark:border-white/5'
-  }
-])
+const categoryCards = computed(() => {
+  const pinnedNames = ['Makanan', 'Minuman', 'Jasa']
+  const cards = pinnedNames.map(name => {
+    const cat = umkmStore.categoriesList.find(c => c.name === name)
+    const color = cat ? cat.color : (name === 'Makanan' ? '#FA6781' : (name === 'Minuman' ? '#59B292' : '#4A5568'))
+    return {
+      name,
+      count: umkmStore.getByCategory(name).length,
+      color
+    }
+  })
+  
+  // Calculate count of other categories' UMKM
+  const otherCount = umkmStore.umkmList.filter(u => !pinnedNames.includes(u.kategori)).length
+  
+  cards.push({
+    name: 'Lainnya',
+    count: otherCount,
+    color: '#718096' // Sleek neutral slate color
+  })
+  
+  return cards
+})
 
 const getCity = (alamat) => {
   const parts = alamat.split(',')
@@ -323,7 +339,11 @@ const handleFeelingLucky = () => {
 }
 
 const searchByCategory = (category) => {
-  router.push({ name: 'SearchResult', query: { q: category } })
+  if (category === 'Lainnya') {
+    router.push({ name: 'SearchResult' })
+  } else {
+    router.push({ name: 'SearchResult', query: { q: category } })
+  }
 }
 
 const loadMore = () => {

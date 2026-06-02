@@ -258,8 +258,8 @@
                     <td class="px-6 py-4 text-gray-600 hidden md:table-cell">{{ item.namaPemilik }}</td>
                     <td class="px-6 py-4 hidden sm:table-cell">
                       <span
-                        :class="categoryBadgeClass(item.kategori)"
-                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
+                        :style="getCategoryLightStyle(item.kategori)"
+                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold shadow-sm"
                       >
                         <CategoryIcon :name="item.kategori" class="w-3.5 h-3.5" />
                         {{ item.kategori }}
@@ -309,12 +309,12 @@
         </section>
 
         <section v-if="activeSection === 'categories'">
-          <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_22rem] gap-6">
+          <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_24rem] gap-6">
             <article class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
               <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between gap-4">
                 <div>
                   <h2 class="text-lg font-bold text-gray-800">Kategori UMKM</h2>
-                  <p class="text-sm text-gray-500 mt-1">Tambah, ubah, atau hapus kategori yang belum dipakai.</p>
+                  <p class="text-sm text-gray-500 mt-1">Kelola kategori usaha warga dengan warna dan icon pilihan.</p>
                 </div>
                 <span class="text-sm font-semibold text-[#59B292] bg-[#59B292]/10 rounded-full px-3 py-1">
                   {{ umkmStore.getCategories().length }} kategori
@@ -323,32 +323,35 @@
 
               <div class="divide-y divide-gray-100">
                 <div
-                  v-for="cat in umkmStore.getCategories()"
-                  :key="cat"
+                  v-for="cat in umkmStore.categoriesList"
+                  :key="cat.name"
                   class="px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
                 >
                   <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-[#59B292]/10 text-[#59B292] flex items-center justify-center">
-                      <CategoryIcon :name="cat" class="w-5 h-5" />
+                    <div
+                      class="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300"
+                      :style="{ backgroundColor: cat.color + '15', color: cat.color }"
+                    >
+                      <CategoryIcon :name="cat.name" class="w-5 h-5" />
                     </div>
                     <div>
-                      <p class="font-semibold text-gray-800">{{ cat }}</p>
-                      <p class="text-sm text-gray-500">{{ categoryUsage(cat) }} UMKM</p>
+                      <p class="font-semibold text-gray-800">{{ cat.name }}</p>
+                      <p class="text-sm text-gray-500">{{ categoryUsage(cat.name) }} UMKM</p>
                     </div>
                   </div>
 
                   <div class="flex items-center gap-2">
                     <button
                       @click="startEditCategory(cat)"
-                      class="px-3 py-2 rounded-lg text-sm font-semibold text-[#59B292] hover:bg-[#59B292]/10 transition-colors"
+                      class="px-3 py-2 rounded-lg text-sm font-semibold text-[#59B292] hover:bg-[#59B292]/10 transition-colors cursor-pointer"
                     >
                       Edit
                     </button>
                     <button
-                      @click="removeCategory(cat)"
-                      class="px-3 py-2 rounded-lg text-sm font-semibold text-[#FA6781] hover:bg-[#FA6781]/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                      :disabled="categoryUsage(cat) > 0"
-                      :title="categoryUsage(cat) > 0 ? 'Kategori masih dipakai UMKM' : 'Hapus kategori'"
+                      @click="removeCategory(cat.name)"
+                      class="px-3 py-2 rounded-lg text-sm font-semibold text-[#FA6781] hover:bg-[#FA6781]/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                      :disabled="categoryUsage(cat.name) > 0"
+                      :title="categoryUsage(cat.name) > 0 ? 'Kategori masih dipakai UMKM' : 'Hapus kategori'"
                     >
                       Hapus
                     </button>
@@ -357,11 +360,11 @@
               </div>
             </article>
 
-            <aside class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-fit">
+            <aside class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-fit max-h-[85vh] overflow-y-auto">
               <h2 class="text-lg font-bold text-gray-800 mb-4">
                 {{ editingCategory ? 'Edit Kategori' : 'Tambah Kategori' }}
               </h2>
-              <div class="space-y-4">
+              <div class="space-y-5">
                 <div>
                   <label class="form-label">Nama Kategori</label>
                   <input
@@ -372,17 +375,71 @@
                     @keyup.enter="saveCategory"
                   />
                 </div>
-                <div class="flex items-center gap-2">
+
+                <div>
+                  <label class="form-label">Pilih Warna Kategori</label>
+                  <div class="flex flex-wrap gap-2 mb-3">
+                    <button
+                      v-for="color in colorPresets"
+                      :key="color"
+                      @click="categoryFormColor = color"
+                      class="w-7 h-7 rounded-full border-2 transition-all duration-200 cursor-pointer"
+                      :style="{ backgroundColor: color }"
+                      :class="categoryFormColor === color ? 'border-gray-800 scale-110 shadow-sm' : 'border-transparent hover:scale-105'"
+                    />
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <div class="relative w-10 h-10 rounded-xl overflow-hidden border border-gray-200 shrink-0">
+                      <input
+                        v-model="categoryFormColor"
+                        type="color"
+                        class="absolute inset-0 w-full h-full p-0 border-0 cursor-pointer scale-150"
+                      />
+                    </div>
+                    <span class="text-xs font-semibold text-gray-500 font-mono uppercase">{{ categoryFormColor }}</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="form-label">Pilih Icon Template</label>
+                  <div class="grid grid-cols-6 gap-2 max-h-48 overflow-y-auto p-2 border border-gray-100 rounded-xl bg-gray-50/50">
+                    <button
+                      v-for="icon in availableIcons"
+                      :key="icon"
+                      @click="categoryFormIcon = icon"
+                      class="p-2 rounded-lg border flex items-center justify-center transition-all duration-200 cursor-pointer"
+                      :class="categoryFormIcon === icon
+                        ? 'border-[#59B292] bg-[#59B292]/10 text-[#59B292] font-bold scale-105 shadow-sm'
+                        : 'border-transparent bg-white hover:bg-gray-100 text-gray-500'"
+                    >
+                      <CategoryIcon :icon="icon" class="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Live Preview -->
+                <div class="pt-4 border-t border-gray-100 flex flex-col items-center">
+                  <span class="text-[10px] font-bold text-gray-400 mb-3 uppercase tracking-wider">Live Preview Badge</span>
+                  <span
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm transition-all duration-300"
+                    :style="{ backgroundColor: categoryFormColor + '15', color: categoryFormColor }"
+                  >
+                    <CategoryIcon :icon="categoryFormIcon" class="w-3.5 h-3.5" />
+                    {{ categoryFormName || 'Nama Kategori' }}
+                  </span>
+                </div>
+
+                <div class="flex items-center gap-2 pt-2">
                   <button
                     @click="saveCategory"
-                    class="flex-1 px-4 py-2.5 rounded-xl bg-[#59B292] text-white text-sm font-semibold hover:bg-[#478f76] transition-colors"
+                    class="flex-1 px-4 py-2.5 rounded-xl bg-[#59B292] text-white text-sm font-semibold hover:bg-[#478f76] transition-colors cursor-pointer"
                   >
                     {{ editingCategory ? 'Simpan' : 'Tambah' }}
                   </button>
                   <button
                     v-if="editingCategory"
                     @click="cancelCategoryEdit"
-                    class="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition-colors"
+                    class="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition-colors cursor-pointer"
                   >
                     Batal
                   </button>
@@ -777,7 +834,7 @@
 import { computed, defineComponent, h, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import CategoryIcon from '../components/CategoryIcon.vue'
-import { umkmStore } from '../data/umkmData'
+import { umkmStore, getCategoryLightStyle } from '../data/umkmData'
 
 const router = useRouter()
 const sidebarOpen = ref(false)
@@ -791,9 +848,23 @@ const isEditing = ref(false)
 const editingId = ref(null)
 const deleteTarget = ref(null)
 const categoryFormName = ref('')
+const categoryFormIcon = ref('grid')
+const categoryFormColor = ref('#59B292')
 const editingCategory = ref('')
 const toast = reactive({ show: false, message: '', type: 'success' })
 const adminEmail = sessionStorage.getItem('umkm-admin-email') || 'Admin'
+
+const availableIcons = [
+  'utensils', 'coffee', 'shirt', 'palette', 'wrench', 'shopping-bag',
+  'car', 'home', 'plug', 'scissors', 'heart', 'book',
+  'dumbbell', 'gamepad', 'paw', 'leaf', 'truck', 'music',
+  'camera', 'briefcase', 'grid'
+]
+
+const colorPresets = [
+  '#FA6781', '#59B292', '#FFC94D', '#E0A96D', '#4A5568',
+  '#4F46E5', '#0EA5E9', '#D946EF', '#F43F5E', '#14B8A6'
+]
 
 const categoryOptions = computed(() => umkmStore.getCategories())
 const allPaymentMethods = [
@@ -1054,14 +1125,18 @@ function categoryUsage(category) {
   return umkmStore.getAll().filter(item => item.kategori === category).length
 }
 
-function startEditCategory(category) {
-  editingCategory.value = category
-  categoryFormName.value = category
+function startEditCategory(categoryObj) {
+  editingCategory.value = categoryObj.name
+  categoryFormName.value = categoryObj.name
+  categoryFormIcon.value = categoryObj.icon || 'grid'
+  categoryFormColor.value = categoryObj.color || '#59B292'
 }
 
 function cancelCategoryEdit() {
   editingCategory.value = ''
   categoryFormName.value = ''
+  categoryFormIcon.value = 'grid'
+  categoryFormColor.value = '#59B292'
 }
 
 function saveCategory() {
@@ -1070,12 +1145,18 @@ function saveCategory() {
     return
   }
 
+  const categoryData = {
+    name: categoryFormName.value.trim(),
+    icon: categoryFormIcon.value,
+    color: categoryFormColor.value
+  }
+
   let ok = false
   if (editingCategory.value) {
-    ok = umkmStore.updateCategory(editingCategory.value, categoryFormName.value)
+    ok = umkmStore.updateCategory(editingCategory.value, categoryData)
     showToast(ok ? 'Kategori berhasil diperbarui.' : 'Kategori sudah ada atau tidak valid.', ok ? 'success' : 'error')
   } else {
-    ok = umkmStore.addCategory(categoryFormName.value)
+    ok = umkmStore.addCategory(categoryData)
     showToast(ok ? 'Kategori berhasil ditambahkan.' : 'Kategori sudah ada atau tidak valid.', ok ? 'success' : 'error')
   }
 
@@ -1257,6 +1338,7 @@ const UrlList = defineComponent({
   border-radius: 0.75rem;
   font-size: 0.875rem;
   background-color: white;
+  color: #111827;
   transition: all 0.2s ease;
   outline: none;
 }

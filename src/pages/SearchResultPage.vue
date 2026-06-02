@@ -1,6 +1,6 @@
 <script setup>
 import { useRoute, useRouter } from 'vue-router'
-import { umkmStore, getCategoryColor } from '../data/umkmData'
+import { umkmStore, getCategoryStyle } from '../data/umkmData'
 import CategoryIcon from '../components/CategoryIcon.vue'
 import { computed, ref } from 'vue'
 
@@ -166,7 +166,7 @@ function truncate(text, maxLength = 100) {
             <div class="absolute top-2 left-2 sm:top-3 sm:left-3">
               <span
                 class="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold shadow-lg"
-                :class="getCategoryColor(umkm.kategori)"
+                :style="getCategoryStyle(umkm.kategori)"
               >
                 <CategoryIcon :name="umkm.kategori" class="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 <span class="hidden sm:inline">{{ umkm.kategori }}</span>
