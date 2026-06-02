@@ -1,7 +1,26 @@
 <template>
+  <transition
+    enter-active-class="transition-opacity duration-300 ease-out"
+    enter-from-class="opacity-0"
+    enter-to-class="opacity-100"
+    leave-active-class="transition-opacity duration-300 ease-in"
+    leave-from-class="opacity-100"
+    leave-to-class="opacity-0"
+  >
+    <div
+      v-if="mobileMenuOpen"
+      class="fixed top-16 bottom-0 left-0 right-0 bg-black/40 backdrop-blur-sm z-40 md:hidden"
+      @click="closeMenu"
+    ></div>
+  </transition>
+
   <nav
     class="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
-    :class="scrolled ? 'bg-white/90 backdrop-blur-xl shadow-lg shadow-primary/5' : 'bg-transparent'"
+    :class="[
+      scrolled && !navSolid ? 'bg-white/90 backdrop-blur-xl shadow-lg shadow-primary/5' : '',
+      navSolid ? 'bg-white shadow-lg shadow-primary/5' : '',
+      !scrolled && !navSolid ? 'bg-transparent' : ''
+    ]"
   >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center gap-4 h-16 lg:h-20">
@@ -73,8 +92,9 @@
         </div>
 
         <button
-          @click="mobileMenuOpen = !mobileMenuOpen"
+          @click="toggleMenu"
           class="md:hidden ml-auto p-2 rounded-xl text-gray-700 hover:bg-white/30 transition-colors"
+          :class="isAnimating ? 'opacity-50 cursor-not-allowed' : ''"
           aria-label="Buka menu"
         >
           <svg v-if="!mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -88,23 +108,23 @@
     </div>
 
     <transition
-      enter-active-class="transition-all duration-300 ease-out"
-      enter-from-class="opacity-0 -translate-y-4"
-      enter-to-class="opacity-100 translate-y-0"
-      leave-active-class="transition-all duration-200 ease-in"
-      leave-from-class="opacity-100 translate-y-0"
-      leave-to-class="opacity-0 -translate-y-4"
+      enter-active-class="transition-opacity duration-300 ease-out"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition-opacity duration-200 ease-in"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
     >
       <div
         v-if="mobileMenuOpen"
-        class="md:hidden bg-white/95 backdrop-blur-xl border-t border-gray-100 shadow-xl"
+        class="md:hidden bg-white border-t border-gray-100 shadow-xl absolute top-full left-0 right-0 w-full"
       >
         <div class="px-4 py-3 space-y-1">
           <router-link
             v-for="link in navLinks"
             :key="link.path"
             :to="link.path"
-            @click="mobileMenuOpen = false"
+            @click="closeMenu"
             class="block px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200"
             :class="isActive(link.path)
               ? 'text-primary bg-primary/10'
@@ -127,7 +147,46 @@ const route = useRoute()
 const router = useRouter()
 const scrolled = ref(false)
 const mobileMenuOpen = ref(false)
+const navSolid = ref(false)
+const isAnimating = ref(false)
 const searchState = homeSearchState
+
+import { watch } from 'vue'
+
+let closeTimeout = null
+
+const toggleMenu = () => {
+  if (isAnimating.value) return
+  isAnimating.value = true
+  mobileMenuOpen.value = !mobileMenuOpen.value
+  setTimeout(() => {
+    isAnimating.value = false
+  }, 320)
+}
+
+const closeMenu = () => {
+  if (isAnimating.value || !mobileMenuOpen.value) return
+  isAnimating.value = true
+  mobileMenuOpen.value = false
+  setTimeout(() => {
+    isAnimating.value = false
+  }, 320)
+}
+
+watch(mobileMenuOpen, (isOpen) => {
+  if (isOpen) {
+    if (closeTimeout) clearTimeout(closeTimeout)
+    navSolid.value = true
+    document.body.classList.add('menu-open')
+  } else {
+    closeTimeout = setTimeout(() => {
+      if (!mobileMenuOpen.value) {
+        navSolid.value = false
+        document.body.classList.remove('menu-open')
+      }
+    }, 300)
+  }
+})
 
 const navLinks = [
   { name: 'Beranda', path: '/' },
@@ -159,3 +218,10 @@ onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
 })
 </script>
+
+<style scoped>
+/* Prevent scrolling when mobile menu is open */
+:global(body.menu-open) {
+  overflow: hidden;
+}
+</style>

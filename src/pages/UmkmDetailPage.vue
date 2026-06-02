@@ -344,14 +344,14 @@
           </router-link>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
           <router-link
             v-for="item in recommendedUmkm"
             :key="item.id"
             :to="{ name: 'UmkmDetail', params: { id: item.id } }"
             class="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-[#59B292]/10 hover:-translate-y-1 transition-all duration-300"
           >
-            <div class="h-40 overflow-hidden">
+            <div class="h-32 sm:h-40 overflow-hidden">
               <img
                 :src="item.foto.utama"
                 :alt="item.namaUsaha"
@@ -359,15 +359,15 @@
                 loading="lazy"
               />
             </div>
-            <div class="p-4">
-              <p :class="['inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold mb-2', getCategoryLightColor(item.kategori)]">
-                <CategoryIcon :name="item.kategori" class="w-3.5 h-3.5" />
-                {{ item.kategori }}
+            <div class="p-3 sm:p-4">
+              <p :class="['inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold mb-1.5 sm:mb-2', getCategoryLightColor(item.kategori)]">
+                <CategoryIcon :name="item.kategori" class="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                <span class="hidden sm:inline">{{ item.kategori }}</span>
               </p>
-              <h3 class="font-bold text-gray-800 group-hover:text-[#59B292] transition-colors line-clamp-1">
+              <h3 class="font-bold text-gray-800 text-sm sm:text-base group-hover:text-[#59B292] transition-colors line-clamp-1">
                 {{ item.namaUsaha }}
               </h3>
-              <p class="text-sm text-gray-500 mt-1 line-clamp-1">{{ getCity(item.alamat) }}</p>
+              <p class="text-[10px] sm:text-sm text-gray-500 mt-0.5 sm:mt-1 line-clamp-1">{{ getCity(item.alamat) }}</p>
             </div>
           </router-link>
         </div>

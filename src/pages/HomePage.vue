@@ -164,14 +164,14 @@
           </router-link>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
           <router-link
             v-for="umkm in displayedUmkm"
             :key="umkm.id"
             :to="{ name: 'UmkmDetail', params: { id: umkm.id } }"
             class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 hover:-translate-y-2 card-hover"
           >
-            <div class="relative h-48 overflow-hidden">
+            <div class="relative h-32 sm:h-48 overflow-hidden">
               <img
                 :src="umkm.foto.utama"
                 :alt="umkm.namaUsaha"
@@ -179,39 +179,39 @@
                 loading="lazy"
               />
               <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-              <div class="absolute top-3 left-3">
-                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold shadow-lg" :class="getCategoryColor(umkm.kategori)">
-                  <CategoryIcon :name="umkm.kategori" class="w-3.5 h-3.5" />
-                  {{ umkm.kategori }}
+              <div class="absolute top-2 left-2 sm:top-3 sm:left-3">
+                <span class="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold shadow-lg" :class="getCategoryColor(umkm.kategori)">
+                  <CategoryIcon :name="umkm.kategori" class="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                  <span class="hidden sm:inline">{{ umkm.kategori }}</span>
                 </span>
               </div>
             </div>
 
-            <div class="p-5">
-              <h3 class="font-bold text-gray-900 text-base mb-1 group-hover:text-primary transition-colors line-clamp-1">
+            <div class="p-3 sm:p-5">
+              <h3 class="font-bold text-gray-900 text-sm sm:text-base mb-1 group-hover:text-primary transition-colors line-clamp-1">
                 {{ umkm.namaUsaha }}
               </h3>
-              <p class="text-gray-400 text-sm mb-3 flex items-center gap-1">
-                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <p class="text-gray-400 text-xs sm:text-sm mb-2 sm:mb-3 flex items-center gap-1">
+                <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM12 14a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7Z" />
                 </svg>
-                {{ umkm.namaPemilik }}
+                <span class="line-clamp-1">{{ umkm.namaPemilik }}</span>
               </p>
-              <p class="text-gray-500 text-sm leading-relaxed line-clamp-2 mb-4">
+              <p class="text-gray-500 text-[10px] sm:text-sm leading-relaxed line-clamp-2 mb-3 sm:mb-4">
                 {{ umkm.deskripsi }}
               </p>
 
-              <div class="flex items-center justify-between pt-3 border-t border-gray-100">
-                <div class="flex items-center gap-1 text-xs text-gray-400 min-w-0">
-                  <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="flex items-center justify-between pt-2 sm:pt-3 border-t border-gray-100">
+                <div class="flex items-center gap-1 text-[10px] sm:text-xs text-gray-400 min-w-0">
+                  <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11Z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10.5h.01" />
                   </svg>
                   <span class="line-clamp-1">{{ getCity(umkm.alamat) }}</span>
                 </div>
-                <span class="text-primary text-xs font-semibold flex items-center gap-1 group-hover:gap-2 transition-all duration-300">
-                  Detail
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <span class="text-primary text-[10px] sm:text-xs font-semibold flex items-center gap-1 group-hover:gap-1.5 sm:group-hover:gap-2 transition-all duration-300">
+                  <span class="hidden sm:inline">Detail</span>
+                  <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                   </svg>
                 </span>
