@@ -37,7 +37,7 @@
                 <input
                   v-model="searchState.query"
                   type="text"
-                  placeholder="Cari UMKM, produk, atau kategori..."
+                  :placeholder="placeholderText"
                   class="flex-1 py-4 pl-5 sm:pl-3 pr-3 bg-transparent text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none text-base sm:text-lg min-w-0 transition-colors duration-300"
                 />
                 <button
@@ -415,10 +415,41 @@ const handleScroll = () => {
   searchState.docked = window.innerWidth >= 1024 && window.scrollY > 480
 }
 
+const placeholderText = ref('')
+const fullText = "Cari UMKM, produk, atau kategori..."
+let typeIndex = 0
+let isDeleting = false
+let typeTimeout = null
+
+const startTypewriter = () => {
+  if (!isDeleting) {
+    placeholderText.value = fullText.slice(0, typeIndex + 1)
+    typeIndex++
+    
+    if (typeIndex === fullText.length) {
+      isDeleting = true
+      typeTimeout = setTimeout(startTypewriter, 3000)
+    } else {
+      typeTimeout = setTimeout(startTypewriter, 100 + Math.random() * 50)
+    }
+  } else {
+    placeholderText.value = fullText.slice(0, typeIndex - 1)
+    typeIndex--
+    
+    if (typeIndex === 0) {
+      isDeleting = false
+      typeTimeout = setTimeout(startTypewriter, 500)
+    } else {
+      typeTimeout = setTimeout(startTypewriter, 40)
+    }
+  }
+}
+
 onMounted(() => {
   window.addEventListener('scroll', handleScroll, { passive: true })
   window.addEventListener('resize', handleScroll)
   handleScroll()
+  startTypewriter()
 })
 
 onUnmounted(() => {
@@ -426,6 +457,7 @@ onUnmounted(() => {
   window.removeEventListener('resize', handleScroll)
   if (luckyInterval) window.clearInterval(luckyInterval)
   if (luckyTimeout) window.clearTimeout(luckyTimeout)
+  if (typeTimeout) window.clearTimeout(typeTimeout)
   searchState.docked = false
 })
 </script>
