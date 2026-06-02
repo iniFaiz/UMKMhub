@@ -35,6 +35,14 @@
                 Katalog UMKM
               </router-link>
             </li>
+            <li>
+              <router-link to="/syarat-ketentuan" class="footer-link">
+                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+                Syarat & Ketentuan
+              </router-link>
+            </li>
           </ul>
         </div>
 

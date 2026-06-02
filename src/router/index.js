@@ -4,6 +4,7 @@ import UmkmDetailPage from '../pages/UmkmDetailPage.vue'
 import SearchResultPage from '../pages/SearchResultPage.vue'
 import AdminPage from '../pages/AdminPage.vue'
 import AdminLoginPage from '../pages/AdminLoginPage.vue'
+import TermsPage from '../pages/TermsPage.vue'
 
 const routes = [
   {
@@ -20,6 +21,11 @@ const routes = [
     path: '/search',
     name: 'SearchResult',
     component: SearchResultPage
+  },
+  {
+    path: '/syarat-ketentuan',
+    name: 'Terms',
+    component: TermsPage
   },
   {
     path: '/admin',
