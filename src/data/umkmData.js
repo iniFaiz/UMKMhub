@@ -15,11 +15,7 @@ if (!storedCategories) {
   localStorage.setItem('umkm-categories', JSON.stringify(defaultCategories))
 }
 
-// Reactive store for UMKM data
-export const umkmStore = reactive({
-  categoriesList: initialCategories,
-  reports: JSON.parse(localStorage.getItem('umkm-reports') || '[]'),
-  umkmList: [
+const defaultUmkmList = [
     {
       id: 1,
       namaUsaha: 'Warung Nasi Padang Bu Ani',
@@ -398,7 +394,19 @@ export const umkmStore = reactive({
       },
       featured: true
     }
-  ],
+]
+
+const storedUmkm = localStorage.getItem('umkm-list')
+const initialUmkm = storedUmkm ? JSON.parse(storedUmkm) : defaultUmkmList
+if (!storedUmkm) {
+  localStorage.setItem('umkm-list', JSON.stringify(defaultUmkmList))
+}
+
+// Reactive store for UMKM data
+export const umkmStore = reactive({
+  categoriesList: initialCategories,
+  reports: JSON.parse(localStorage.getItem('umkm-reports') || '[]'),
+  umkmList: initialUmkm,
 
   // Get all UMKM
   getAll() {
@@ -478,6 +486,7 @@ export const umkmStore = reactive({
         if (u.kategori === oldName) u.kategori = cleanName
       })
 
+      localStorage.setItem('umkm-list', JSON.stringify(this.umkmList))
       localStorage.setItem('umkm-categories', JSON.stringify(this.categoriesList))
       return true
     }
@@ -500,11 +509,13 @@ export const umkmStore = reactive({
 
   // Add new UMKM
   add(umkm) {
-    const newId = Math.max(...this.umkmList.map(u => u.id)) + 1
+    const newId = this.umkmList.length ? Math.max(...this.umkmList.map(u => u.id)) + 1 : 1
     if (umkm.kategori && !this.getCategories().includes(umkm.kategori)) {
-      this.categories.push(umkm.kategori)
+      this.categoriesList.push({ name: umkm.kategori, icon: 'grid', color: '#59B292' })
+      localStorage.setItem('umkm-categories', JSON.stringify(this.categoriesList))
     }
     this.umkmList.push({ ...umkm, id: newId })
+    localStorage.setItem('umkm-list', JSON.stringify(this.umkmList))
     return newId
   },
 
@@ -513,6 +524,7 @@ export const umkmStore = reactive({
     const index = this.umkmList.findIndex(u => u.id === Number(id))
     if (index !== -1) {
       this.umkmList[index] = { ...this.umkmList[index], ...data }
+      localStorage.setItem('umkm-list', JSON.stringify(this.umkmList))
       return true
     }
     return false
@@ -523,6 +535,7 @@ export const umkmStore = reactive({
     const index = this.umkmList.findIndex(u => u.id === Number(id))
     if (index !== -1) {
       this.umkmList.splice(index, 1)
+      localStorage.setItem('umkm-list', JSON.stringify(this.umkmList))
       return true
     }
     return false

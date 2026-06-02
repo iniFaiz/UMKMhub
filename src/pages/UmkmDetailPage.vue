@@ -683,7 +683,15 @@ const allPhotos = computed(() => {
     photos.push({ url, label: `Foto Produk ${i + 1}` })
   })
   if (umkm.value.foto.menu) {
-    photos.push({ url: umkm.value.foto.menu, label: 'Menu' })
+    if (Array.isArray(umkm.value.foto.menu)) {
+      umkm.value.foto.menu.forEach((url, i) => {
+        if (url && url.trim()) {
+          photos.push({ url, label: `Menu ${i + 1}` })
+        }
+      })
+    } else if (typeof umkm.value.foto.menu === 'string' && umkm.value.foto.menu.trim()) {
+      photos.push({ url: umkm.value.foto.menu, label: 'Menu' })
+    }
   }
 
   return photos
@@ -698,8 +706,8 @@ const recommendedUmkm = computed(() => {
 })
 
 const mapEmbedUrl = computed(() => {
-  if (!umkm.value) return ''
-  return normalizeMapEmbed(umkm.value.mapsEmbed || umkm.value.alamat)
+  if (!umkm.value || !umkm.value.mapsEmbed) return ''
+  return normalizeMapEmbed(umkm.value.mapsEmbed)
 })
 
 function formatPrice(price) {

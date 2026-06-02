@@ -590,7 +590,7 @@
                   </select>
                 </div>
                 <div>
-                  <label class="form-label">Alamat</label>
+                  <label class="form-label">Alamat <span class="text-[#FA6781]">*</span></label>
                   <input v-model="form.alamat" type="text" class="form-input" placeholder="Masukkan alamat lengkap" />
                 </div>
                 <div class="md:col-span-2">
@@ -599,11 +599,11 @@
                     v-model="form.mapsEmbed"
                     type="text"
                     class="form-input"
-                    placeholder="Paste iframe, link Google Maps, atau koordinat"
+                    placeholder="Paste iframe, link Google Maps, atau koordinat (opsional)"
                   />
                 </div>
                 <div class="md:col-span-2">
-                  <label class="form-label">Deskripsi</label>
+                  <label class="form-label">Deskripsi <span class="text-[#FA6781]">*</span></label>
                   <textarea v-model="form.deskripsi" rows="3" class="form-input resize-none" placeholder="Tuliskan deskripsi UMKM..."></textarea>
                 </div>
               </div>
@@ -617,19 +617,43 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label class="form-label">Telepon</label>
-                  <input v-model="form.kontak.telepon" type="text" class="form-input" placeholder="0812-xxxx-xxxx" />
+                  <input
+                    v-model="form.kontak.telepon"
+                    type="text"
+                    class="form-input"
+                    placeholder="0812-xxxx-xxxx"
+                    @input="form.kontak.telepon = formatPhoneNumber($event.target.value)"
+                  />
                 </div>
                 <div>
                   <label class="form-label">WhatsApp</label>
-                  <input v-model="form.kontak.whatsapp" type="text" class="form-input" placeholder="0812-xxxx-xxxx" />
+                  <input
+                    v-model="form.kontak.whatsapp"
+                    type="text"
+                    class="form-input"
+                    placeholder="0812-xxxx-xxxx"
+                    @input="form.kontak.whatsapp = formatPhoneNumber($event.target.value)"
+                  />
                 </div>
                 <div>
                   <label class="form-label">Instagram</label>
-                  <input v-model="form.kontak.instagram" type="text" class="form-input" placeholder="@username" />
+                  <input
+                    v-model="form.kontak.instagram"
+                    type="text"
+                    class="form-input"
+                    placeholder="@username"
+                    @input="form.kontak.instagram = formatInstagram($event.target.value)"
+                  />
                 </div>
                 <div>
                   <label class="form-label">Email</label>
-                  <input v-model="form.kontak.email" type="email" class="form-input" placeholder="email@example.com" />
+                  <input
+                    v-model="form.kontak.email"
+                    type="email"
+                    class="form-input"
+                    placeholder="email@example.com"
+                    @input="form.kontak.email = formatEmail($event.target.value)"
+                  />
                 </div>
               </div>
             </fieldset>
@@ -643,19 +667,57 @@
                 <div
                   v-for="(jam, index) in form.jamOperasional"
                   :key="index"
-                  class="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-3"
+                  class="p-4 border border-gray-100 rounded-xl bg-gray-50/30 space-y-2"
                 >
-                  <input v-model="jam.hari" type="text" class="form-input" placeholder="Senin - Jumat" />
-                  <input v-model="jam.jam" type="text" class="form-input" placeholder="08:00 - 17:00" />
-                  <button
-                    @click="removeJamOperasional(index)"
-                    class="icon-action text-[#FA6781] hover:bg-[#FA6781]/10"
-                    :disabled="form.jamOperasional.length <= 1"
-                    :class="{ 'opacity-30 cursor-not-allowed': form.jamOperasional.length <= 1 }"
-                    type="button"
-                  >
-                    <IconTrash />
-                  </button>
+                  <div class="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-3">
+                    <input
+                      v-model="jam.hari"
+                      type="text"
+                      class="form-input"
+                      placeholder="Senin - Jumat"
+                      @keydown="handleHariKeydown(index, $event)"
+                      @input="jam.hari = formatCapitalize($event.target.value)"
+                    />
+                    <input
+                      :id="`jam-input-${index}`"
+                      v-model="jam.jam"
+                      type="text"
+                      class="form-input"
+                      placeholder="00:00 - 00:00"
+                      :disabled="jam.jam === 'Buka 24 Jam' || jam.jam === 'Tutup'"
+                      :class="{ 'bg-gray-100/70 text-gray-500 cursor-not-allowed': jam.jam === 'Buka 24 Jam' || jam.jam === 'Tutup' }"
+                      @keydown="handleTimeKeydown(index, $event)"
+                    />
+                    <button
+                      @click="removeJamOperasional(index)"
+                      class="icon-action text-[#FA6781] hover:bg-[#FA6781]/10"
+                      :disabled="form.jamOperasional.length <= 1"
+                      :class="{ 'opacity-30 cursor-not-allowed': form.jamOperasional.length <= 1 }"
+                      type="button"
+                    >
+                      <IconTrash />
+                    </button>
+                  </div>
+                  <div class="flex items-center gap-4 pl-1 text-xs">
+                    <label class="flex items-center gap-1.5 cursor-pointer text-gray-500 hover:text-gray-700 select-none">
+                      <input
+                        type="checkbox"
+                        :checked="jam.jam === 'Buka 24 Jam'"
+                        @change="toggleSpecialTime(index, 'Buka 24 Jam')"
+                        class="w-3.5 h-3.5 rounded border-gray-300 text-[#59B292] focus:ring-[#59B292]"
+                      />
+                      <span>Buka 24 Jam</span>
+                    </label>
+                    <label class="flex items-center gap-1.5 cursor-pointer text-gray-500 hover:text-gray-700 select-none">
+                      <input
+                        type="checkbox"
+                        :checked="jam.jam === 'Tutup'"
+                        @change="toggleSpecialTime(index, 'Tutup')"
+                        class="w-3.5 h-3.5 rounded border-gray-300 text-[#59B292] focus:ring-[#59B292]"
+                      />
+                      <span>Tutup</span>
+                    </label>
+                  </div>
                 </div>
                 <button
                   @click="addJamOperasional"
@@ -742,13 +804,10 @@
               </legend>
               <div class="space-y-4">
                 <div>
-                  <label class="form-label">Foto Utama</label>
+                  <label class="form-label">Foto Utama <span class="text-[#FA6781]">*</span></label>
                   <input v-model="form.foto.utama" type="url" class="form-input" placeholder="https://example.com/foto-utama.jpg" />
                 </div>
-                <div>
-                  <label class="form-label">Foto Menu</label>
-                  <input v-model="form.foto.menu" type="url" class="form-input" placeholder="https://example.com/foto-menu.jpg" />
-                </div>
+                <UrlList v-model="form.foto.menu" label="Foto Menu" />
                 <UrlList v-model="form.foto.tempat" label="Foto Tempat" />
                 <UrlList v-model="form.foto.produk" label="Foto Produk" />
               </div>
@@ -831,7 +890,7 @@
 </template>
 
 <script setup>
-import { computed, defineComponent, h, onMounted, onUnmounted, reactive, ref } from 'vue'
+import { computed, defineComponent, h, nextTick, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import CategoryIcon from '../components/CategoryIcon.vue'
 import { umkmStore, getCategoryLightStyle } from '../data/umkmData'
@@ -863,7 +922,10 @@ const availableIcons = [
 
 const colorPresets = [
   '#FA6781', '#59B292', '#FFC94D', '#E0A96D', '#4A5568',
-  '#4F46E5', '#0EA5E9', '#D946EF', '#F43F5E', '#14B8A6'
+  '#4F46E5', '#0EA5E9', '#D946EF', '#F43F5E', '#14B8A6',
+  '#3B82F6', '#10B981', '#F97316', '#8B5CF6', '#EC4899',
+  '#EF4444', '#06B6D4', '#84CC16', '#172554', '#78350F',
+  '#022C22', '#475569', '#A21CAF', '#65A30D'
 ]
 
 const categoryOptions = computed(() => umkmStore.getCategories())
@@ -880,10 +942,10 @@ const getEmptyForm = () => ({
   alamat: '',
   mapsEmbed: '',
   kontak: { telepon: '', whatsapp: '', instagram: '', email: '' },
-  jamOperasional: [{ hari: '', jam: '' }],
+  jamOperasional: [{ hari: '', jam: '00:00 - 00:00' }],
   produk: [{ nama: '', harga: 0, deskripsi: '' }],
   metodePembayaran: [],
-  foto: { utama: '', tempat: [''], produk: [''], menu: '' }
+  foto: { utama: '', tempat: [''], produk: [''], menu: [''] }
 })
 
 const form = reactive(getEmptyForm())
@@ -979,6 +1041,150 @@ function categoryBadgeClass(kategori) {
   return map[kategori] || 'bg-gray-100 text-gray-700'
 }
 
+function formatCapitalize(value) {
+  if (!value) return ''
+  return value.replace(/\b\w/g, char => char.toUpperCase())
+}
+
+function formatPhoneNumber(value) {
+  const digits = value.replace(/\D/g, '')
+  const truncated = digits.substring(0, 13)
+  if (truncated.length <= 4) {
+    return truncated
+  } else if (truncated.length <= 8) {
+    return `${truncated.slice(0, 4)}-${truncated.slice(4)}`
+  } else {
+    return `${truncated.slice(0, 4)}-${truncated.slice(4, 8)}-${truncated.slice(8)}`
+  }
+}
+
+function formatInstagram(value) {
+  let val = value.replace(/\s+/g, '')
+  val = val.replace(/[^a-zA-Z0-9_.\-@]/g, '')
+  return val.toLowerCase()
+}
+
+function formatEmail(value) {
+  let val = value.replace(/\s+/g, '')
+  val = val.replace(/[^a-zA-Z0-9@._\-+]/g, '')
+  return val.toLowerCase()
+}
+
+function handleTimeKeydown(index, event) {
+  const input = event.target
+  const val = form.jamOperasional[index].jam || ''
+  
+  // Handle Backspace
+  if (event.key === 'Backspace') {
+    event.preventDefault()
+    
+    // If text is selected, reset to default template
+    if (input.selectionStart !== input.selectionEnd) {
+      form.jamOperasional[index].jam = '00:00 - 00:00'
+      nextTick(() => {
+        input.setSelectionRange(0, 0)
+      })
+      return
+    }
+    
+    let start = input.selectionStart
+    if (start === 0) return
+    
+    // Move backward, skipping separators
+    let prevIdx = start - 1
+    while (prevIdx > 0 && (prevIdx === 2 || prevIdx === 5 || prevIdx === 6 || prevIdx === 7 || prevIdx === 10)) {
+      prevIdx--
+    }
+    
+    const isMask = /^\d\d:\d\d\s-\s\d\d:\d\d$/.test(val)
+    let currentVal = isMask ? val : '00:00 - 00:00'
+    const chars = currentVal.split('')
+    if (prevIdx >= 0 && prevIdx < chars.length && /\d/.test(chars[prevIdx])) {
+      chars[prevIdx] = '0'
+    }
+    form.jamOperasional[index].jam = chars.join('')
+    
+    nextTick(() => {
+      input.setSelectionRange(prevIdx, prevIdx)
+    })
+    return
+  }
+
+  // Allow standard navigation keys
+  const navKeys = ['Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter']
+  if (navKeys.includes(event.key) || event.ctrlKey || event.metaKey) {
+    return
+  }
+
+  // Handle Digits
+  if (/^\d$/.test(event.key)) {
+    event.preventDefault()
+    
+    // If text is selected, reset and replace first digit
+    if (input.selectionStart !== input.selectionEnd) {
+      const chars = '00:00 - 00:00'.split('')
+      chars[0] = event.key
+      form.jamOperasional[index].jam = chars.join('')
+      nextTick(() => {
+        input.setSelectionRange(1, 1)
+      })
+      return
+    }
+    
+    const isMask = /^\d\d:\d\d\s-\s\d\d:\d\d$/.test(val)
+    let currentVal = isMask ? val : '00:00 - 00:00'
+    let start = isMask ? input.selectionStart : 0
+    
+    if (start >= 13) return
+    
+    // Skip separators
+    while (start < 13 && (start === 2 || start === 5 || start === 6 || start === 7 || start === 10)) {
+      start++
+    }
+    
+    const chars = currentVal.split('')
+    chars[start] = event.key
+    form.jamOperasional[index].jam = chars.join('')
+    
+    let nextPos = start + 1
+    while (nextPos < 13 && (nextPos === 2 || nextPos === 5 || nextPos === 6 || nextPos === 7 || nextPos === 10)) {
+      nextPos++
+    }
+    
+    nextTick(() => {
+      input.setSelectionRange(nextPos, nextPos)
+    })
+  } else {
+    event.preventDefault()
+  }
+}
+
+function handleHariKeydown(index, event) {
+  if (/^\d$/.test(event.key)) {
+    event.preventDefault()
+    const nextInput = document.getElementById(`jam-input-${index}`)
+    if (nextInput) {
+      nextInput.focus()
+      const start = nextInput.selectionStart
+      const end = nextInput.selectionEnd
+      const val = form.jamOperasional[index].jam || ''
+      form.jamOperasional[index].jam = val.slice(0, start) + event.key + val.slice(end)
+      nextTick(() => {
+        nextInput.setSelectionRange(start + 1, start + 1)
+      })
+    }
+  }
+}
+
+function toggleSpecialTime(index, value) {
+  const current = form.jamOperasional[index].jam
+  if (current === value) {
+    form.jamOperasional[index].jam = '00:00 - 00:00'
+  } else {
+    form.jamOperasional[index].jam = value
+  }
+}
+
 function resetForm() {
   Object.assign(form, getEmptyForm())
 }
@@ -1007,8 +1213,8 @@ function openEditModal(item) {
       email: item.kontak?.email || ''
     },
     jamOperasional: item.jamOperasional?.length
-      ? item.jamOperasional.map(jam => ({ ...jam }))
-      : [{ hari: '', jam: '' }],
+      ? item.jamOperasional.map(jam => ({ hari: jam.hari || '', jam: jam.jam || '00:00 - 00:00' }))
+      : [{ hari: '', jam: '00:00 - 00:00' }],
     produk: item.produk?.length
       ? item.produk.map(produk => ({ ...produk }))
       : [{ nama: '', harga: 0, deskripsi: '' }],
@@ -1017,7 +1223,9 @@ function openEditModal(item) {
       utama: item.foto?.utama || '',
       tempat: item.foto?.tempat?.length ? [...item.foto.tempat] : [''],
       produk: item.foto?.produk?.length ? [...item.foto.produk] : [''],
-      menu: item.foto?.menu || ''
+      menu: Array.isArray(item.foto?.menu)
+        ? [...item.foto.menu]
+        : (item.foto?.menu ? [item.foto.menu] : [''])
     }
   })
   showFormModal.value = true
@@ -1029,7 +1237,7 @@ function closeFormModal() {
 }
 
 function addJamOperasional() {
-  form.jamOperasional.push({ hari: '', jam: '' })
+  form.jamOperasional.push({ hari: '', jam: '00:00 - 00:00' })
 }
 
 function removeJamOperasional(index) {
@@ -1049,8 +1257,21 @@ function removeProduk(index) {
 }
 
 function saveUmkm() {
-  if (!form.namaUsaha.trim() || !form.namaPemilik.trim() || !form.kategori) {
-    showToast('Mohon lengkapi field yang wajib diisi.', 'error')
+  if (
+    !form.namaUsaha.trim() ||
+    !form.namaPemilik.trim() ||
+    !form.kategori ||
+    !form.alamat.trim() ||
+    !form.deskripsi.trim() ||
+    !form.foto.utama.trim()
+  ) {
+    showToast('Mohon lengkapi field yang wajib diisi (Nama Usaha, Pemilik, Kategori, Alamat, Deskripsi, dan Foto Utama).', 'error')
+    return
+  }
+
+  // Validate Google Maps URL if provided
+  if (form.mapsEmbed.trim() && !isValidGoogleMapsUrl(form.mapsEmbed)) {
+    showToast('Tautan Google Maps tidak valid. Harus berupa tautan Google Maps asli (share link atau iframe embed).', 'error')
     return
   }
 
@@ -1066,10 +1287,10 @@ function saveUmkm() {
     produk: form.produk.filter(produk => produk.nama.trim()),
     metodePembayaran: [...form.metodePembayaran],
     foto: {
-      utama: form.foto.utama || '',
+      utama: form.foto.utama.trim(),
       tempat: form.foto.tempat.filter(url => url.trim()),
       produk: form.foto.produk.filter(url => url.trim()),
-      menu: form.foto.menu || null
+      menu: form.foto.menu.filter(url => url.trim())
     }
   }
 
@@ -1196,6 +1417,26 @@ function normalizeMapEmbed(value) {
   }
 
   return `https://www.google.com/maps?q=${encodeURIComponent(raw)}&output=embed`
+}
+
+function isValidGoogleMapsUrl(value) {
+  const input = (value || '').trim()
+  if (!input) return true
+
+  const iframeSrc = input.match(/src=["']([^"']+)["']/i)?.[1]
+  const rawUrl = iframeSrc || input
+
+  try {
+    const url = new URL(rawUrl)
+    const hostname = url.hostname.toLowerCase()
+    
+    return (hostname.includes('google.') && url.pathname.includes('/maps')) ||
+           (hostname === 'maps.google.com') ||
+           (hostname === 'maps.app.goo.gl') ||
+           (hostname === 'goo.gl' && url.pathname.startsWith('/maps'))
+  } catch (e) {
+    return false
+  }
 }
 
 function logout() {
