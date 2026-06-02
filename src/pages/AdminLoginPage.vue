@@ -1,6 +1,6 @@
 <template>
-  <div class="min-h-screen bg-[#FFF9F0] flex items-center justify-center px-4 py-10">
-    <section class="w-full max-w-md bg-white border border-gray-100 rounded-2xl shadow-xl shadow-[#59B292]/10 p-6 sm:p-8">
+  <div class="min-h-screen bg-[#FFF9F0] dark:bg-[#0c0e14] flex items-center justify-center px-4 py-10 transition-colors duration-300">
+    <section class="w-full max-w-md bg-white dark:bg-[#161a24] border border-gray-100 dark:border-white/5 rounded-2xl shadow-xl shadow-[#59B292]/10 dark:shadow-black/40 p-6 sm:p-8 transition-colors duration-300">
       <router-link to="/" class="inline-flex items-center gap-2 text-sm font-semibold text-[#59B292] hover:text-[#478f76] mb-8">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -14,31 +14,31 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2Zm10-10V7a4 4 0 0 0-8 0v4" />
           </svg>
         </div>
-        <h1 class="text-2xl font-extrabold text-gray-900">Login Admin</h1>
-        <p class="text-sm text-gray-500 mt-2">Masukkan email dan password untuk membuka panel admin.</p>
+        <h1 class="text-2xl font-extrabold text-gray-900 dark:text-white">Login Admin</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Masukkan email dan password untuk membuka panel admin.</p>
       </div>
 
       <form class="space-y-5" @submit.prevent="handleLogin">
         <div>
-          <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+          <label for="email" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Email</label>
           <input
             id="email"
             v-model.trim="email"
             type="email"
             autocomplete="email"
-            class="w-full px-4 py-3 rounded-xl border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#59B292]/40 focus:border-[#59B292]"
+            class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-white/10 text-gray-800 dark:text-white bg-white dark:bg-[#0d0f14] placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#59B292]/40 focus:border-[#59B292] transition-colors duration-300"
             placeholder="admin@umkmkatalog.id"
           />
         </div>
 
         <div>
-          <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+          <label for="password" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Password</label>
           <input
             id="password"
             v-model="password"
             type="password"
             autocomplete="current-password"
-            class="w-full px-4 py-3 rounded-xl border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#59B292]/40 focus:border-[#59B292]"
+            class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-white/10 text-gray-800 dark:text-white bg-white dark:bg-[#0d0f14] placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#59B292]/40 focus:border-[#59B292] transition-colors duration-300"
             placeholder="Password"
           />
         </div>

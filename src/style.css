@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-primary: #59B292;
   --color-primary-dark: #478f76;
@@ -177,4 +179,77 @@ body {
 
 .img-zoom:hover img {
   transform: scale(1.08);
+}
+
+/* Dark Mode Global Styles */
+.dark body {
+  color: #f1f2f6;
+  background-color: #0c0e14;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #161a24;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #59B292;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #478f76;
+}
+
+.dark ::selection {
+  background: #59B292;
+  color: #0c0e14;
+}
+
+/* Glass effect dark mode */
+.dark .glass {
+  background: rgba(12, 14, 20, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Shimmer dark mode */
+.dark .shimmer {
+  background: linear-gradient(90deg, #161a24 25%, #1f2533 50%, #161a24 75%);
+  background-size: 200% 100%;
+}
+
+/* View Transitions circular clip-path reveal */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+  z-index: 1;
+}
+::view-transition-new(root) {
+  z-index: 9999;
+  animation: 500ms ease-in-out both ripple-reveal;
+}
+
+@keyframes ripple-reveal {
+  from {
+    clip-path: circle(0px at var(--ripple-x, 50%) var(--ripple-y, 50%));
+  }
+  to {
+    clip-path: circle(var(--ripple-radius, 100%) at var(--ripple-x, 50%) var(--ripple-y, 50%));
+  }
+}
+
+/* Disable all transitions during theme switch to prevent View Transition screenshots from capturing half-transitioned states */
+.disable-transitions body,
+.disable-transitions body * {
+  transition: none !important;
+  transition-duration: 0s !important;
+}
+
+/* Force solid background during view transitions only when navbar is scrolled/solid (has shadow) to prevent transparent flash from losing backdrop blur */
+.disable-transitions nav.shadow-lg {
+  background-color: white !important;
+}
+.dark.disable-transitions nav.shadow-lg {
+  background-color: #0c0e14 !important;
 }

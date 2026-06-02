@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-[#FFF9F0] flex flex-col">
+  <div class="min-h-screen bg-[#FFF9F0] dark:bg-[#0c0e14] flex flex-col transition-colors duration-300">
     <Navbar v-if="!hideShell" />
     <main class="flex-1">
       <router-view v-slot="{ Component }">
