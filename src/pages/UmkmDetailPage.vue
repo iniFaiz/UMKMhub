@@ -210,6 +210,39 @@
             </div>
           </article>
 
+          <!-- Produk / Menu (Hanya Tampil di Mobile) -->
+          <article class="info-card lg:hidden bg-white dark:bg-[#161a24] border border-gray-100 dark:border-white/5 transition-all duration-300">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-6 flex items-center gap-2">
+              <span class="heading-icon bg-[#FFC94D]/15">
+                <svg class="w-4 h-4 text-[#FFC94D]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 0 0-8 0v4M5 9h14l1 12H4L5 9Z" />
+                </svg>
+              </span>
+              Produk / Menu
+              <span class="ml-auto text-xs font-medium text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-black/30 px-2.5 py-1 rounded-full">
+                {{ umkm.produk.length }} item
+              </span>
+            </h2>
+
+            <div class="space-y-3">
+              <div
+                v-for="(produk, index) in umkm.produk"
+                :key="index"
+                class="group p-4 rounded-xl border border-gray-100 dark:border-white/5 hover:border-[#59B292]/30 hover:bg-[#59B292]/[0.03] dark:hover:bg-[#59B292]/10 transition-all duration-300 cursor-default bg-white dark:bg-[#0d0f14]"
+              >
+                <div class="flex items-start justify-between gap-3 mb-1.5">
+                  <h3 class="font-semibold text-gray-800 dark:text-white text-sm leading-snug group-hover:text-[#59B292] transition-colors">
+                    {{ produk.nama }}
+                  </h3>
+                  <span class="shrink-0 text-sm font-bold text-[#59B292] bg-[#59B292]/10 dark:bg-[#59B292]/20 px-2.5 py-0.5 rounded-lg whitespace-nowrap">
+                    Rp {{ formatPrice(produk.harga) }}
+                  </span>
+                </div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{{ produk.deskripsi }}</p>
+              </div>
+            </div>
+          </article>
+
           <article class="info-card bg-white dark:bg-[#161a24] border border-gray-100 dark:border-white/5 transition-all duration-300">
             <h2 class="section-heading text-gray-800 dark:text-white transition-colors duration-300">
               <span class="heading-icon bg-[#FA6781]/10">
@@ -237,9 +270,40 @@
               ></iframe>
             </div>
           </article>
+
+          <!-- Laporkan Kesalahan / Tutup -->
+          <article class="info-card bg-white dark:bg-[#161a24] border border-gray-100 dark:border-white/5 transition-all duration-300">
+            <h2 class="section-heading text-gray-800 dark:text-white transition-colors duration-300">
+              <span class="heading-icon bg-[#FA6781]/10">
+                <svg class="w-4 h-4 text-[#FA6781]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3Z" />
+                </svg>
+              </span>
+              Laporkan Informasi Usaha
+            </h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-5 leading-relaxed">
+              Apakah Anda menemukan kesalahan penulisan data atau toko/usaha ini sudah tutup permanen? Silakan ajukan laporan ke Pengurus RT.
+            </p>
+            <div class="flex flex-wrap gap-3">
+              <button
+                @click="openReportModal('kesalahan_data')"
+                :disabled="hasReported"
+                class="px-4 py-2.5 rounded-xl text-sm font-semibold border border-[#FFC94D]/50 text-[#c28c00] dark:text-[#ffca4d] hover:bg-[#FFC94D]/10 dark:hover:bg-[#FFC94D]/5 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {{ hasReported ? 'Laporan Telah Dikirim' : 'Laporkan Kesalahan Data' }}
+              </button>
+              <button
+                @click="openReportModal('toko_tutup')"
+                :disabled="hasReported"
+                class="px-4 py-2.5 rounded-xl text-sm font-semibold border border-[#FA6781]/50 text-[#FA6781] hover:bg-[#FA6781]/10 dark:hover:bg-[#FA6781]/5 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {{ hasReported ? 'Toko Dilaporkan Tutup' : 'Toko Sudah Tutup' }}
+              </button>
+            </div>
+          </article>
         </div>
 
-        <aside class="lg:col-span-2">
+        <aside class="hidden lg:block lg:col-span-2">
           <div class="lg:sticky lg:top-24">
             <div class="bg-white dark:bg-[#161a24] rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100 dark:border-white/5 transition-colors duration-300">
               <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-6 flex items-center gap-2">
@@ -450,6 +514,77 @@
         </svg>
       </button>
     </transition>
+
+    <!-- Report Modal -->
+    <Teleport to="body">
+      <Transition name="lightbox">
+        <div
+          v-if="reportModalOpen"
+          class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          @click.self="closeReportModal"
+        >
+          <div class="bg-white dark:bg-[#161a24] rounded-2xl w-full max-w-md p-6 shadow-2xl border border-gray-100 dark:border-white/5 animate-fade-in">
+            <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2">
+              {{ reportType === 'toko_tutup' ? 'Laporkan Toko Sudah Tutup' : 'Laporkan Kesalahan Data' }}
+            </h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">
+              {{ reportType === 'toko_tutup'
+                ? 'Apakah Anda yakin toko/usaha ini sudah tutup permanen atau tidak beroperasi lagi?'
+                : 'Silakan jelaskan bagian data mana yang salah atau keliru agar dapat segera diperbaiki oleh Pengurus RT.' }}
+            </p>
+            
+            <div v-if="reportType === 'kesalahan_data'" class="mb-4">
+              <label class="block text-xs font-semibold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-2">Detail Kesalahan</label>
+              <textarea
+                v-model="reportDetail"
+                rows="3"
+                class="w-full px-3 py-2 border rounded-xl bg-transparent text-sm text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none resize-none transition-all duration-200"
+                :class="wordCount > 200 ? 'border-[#FA6781] focus:border-[#FA6781]' : 'border-gray-200 dark:border-white/5 focus:border-[#59B292]'"
+                placeholder="Contoh: Nomor WhatsApp sudah tidak aktif, alamat pindah ke..."
+              ></textarea>
+              <div class="flex justify-between items-center mt-1">
+                <p v-if="wordCount > 200" class="text-xs text-[#FA6781]">Deskripsi tidak boleh melebihi 200 kata.</p>
+                <p v-else class="text-xs text-gray-400 dark:text-gray-550"></p>
+                <p class="text-xs font-semibold" :class="wordCount > 200 ? 'text-[#FA6781]' : 'text-gray-400 dark:text-gray-500'">
+                  {{ wordCount }} / 200 kata
+                </p>
+              </div>
+            </div>
+
+            <div class="flex gap-3 justify-end mt-6">
+              <button
+                @click="closeReportModal"
+                class="px-4 py-2 rounded-xl text-sm font-semibold border border-gray-200 dark:border-white/5 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                @click="submitReport"
+                :disabled="reportType === 'kesalahan_data' && (wordCount === 0 || wordCount > 200)"
+                class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-[#FA6781] hover:bg-[#e04d66] text-white shadow-lg shadow-[#FA6781]/25 active:scale-95 transition-all duration-200 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Kirim Laporan
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- Success Toast -->
+    <Transition name="toast">
+      <div
+        v-if="toastOpen"
+        class="fixed bottom-6 right-6 z-[60] bg-white dark:bg-[#161a24] border border-gray-100 dark:border-white/5 shadow-xl shadow-[#59B292]/10 dark:shadow-black/40 rounded-xl px-5 py-3.5 flex items-center gap-3"
+      >
+        <div class="w-8 h-8 rounded-full bg-[#59B292] text-white flex items-center justify-center">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7" />
+          </svg>
+        </div>
+        <p class="text-sm font-semibold text-gray-800 dark:text-white">Laporan Anda telah terkirim ke Pengurus RT.</p>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -461,6 +596,68 @@ import { umkmStore, getCategoryColor, getCategoryLightColor } from '../data/umkm
 
 const route = useRoute()
 const router = useRouter()
+
+const reportModalOpen = ref(false)
+const reportType = ref('') // 'kesalahan_data' | 'toko_tutup'
+const reportDetail = ref('')
+const toastOpen = ref(false)
+const hasReported = ref(false)
+
+const wordCount = computed(() => {
+  if (!reportDetail.value) return 0
+  return reportDetail.value.trim().split(/\s+/).filter(Boolean).length
+})
+
+function checkReportedStatus() {
+  if (umkm.value) {
+    hasReported.value = localStorage.getItem(`reported-${umkm.value.id}`) === 'true'
+  } else {
+    hasReported.value = false
+  }
+}
+
+function openReportModal(type) {
+  if (hasReported.value) return
+  reportType.value = type
+  reportDetail.value = ''
+  reportModalOpen.value = true
+}
+
+function closeReportModal() {
+  reportModalOpen.value = false
+}
+
+function submitReport() {
+  if (hasReported.value) return
+  if (reportType.value === 'kesalahan_data' && (wordCount.value === 0 || wordCount.value > 200)) {
+    return
+  }
+  
+  const words = reportDetail.value.trim().split(/\s+/).filter(Boolean)
+  const detailText = reportType.value === 'toko_tutup'
+    ? 'Laporan toko tutup permanen.'
+    : words.slice(0, 200).join(' ')
+
+  umkmStore.addReport({
+    umkmId: umkm.value.id,
+    namaUsaha: umkm.value.namaUsaha,
+    tipe: reportType.value,
+    detail: detailText
+  })
+
+  localStorage.setItem(`reported-${umkm.value.id}`, 'true')
+  hasReported.value = true
+
+  closeReportModal()
+  showToast()
+}
+
+function showToast() {
+  toastOpen.value = true
+  setTimeout(() => {
+    toastOpen.value = false
+  }, 3000)
+}
 
 const umkm = computed(() => umkmStore.getById(route.params.id))
 const heroLoaded = ref(false)
@@ -589,10 +786,11 @@ onUnmounted(() => {
 })
 
 watch(() => route.params.id, () => {
+  checkReportedStatus()
   heroLoaded.value = false
   lightboxOpen.value = false
   document.body.style.overflow = ''
-})
+}, { immediate: true })
 </script>
 
 <style scoped>
@@ -710,5 +908,20 @@ watch(() => route.params.id, () => {
 
 .lightbox-enter-from img {
   transform: scale(0.9);
+}
+
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 0.4s ease;
+}
+
+.toast-enter-from {
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+}
+
+.toast-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
 }
 </style>

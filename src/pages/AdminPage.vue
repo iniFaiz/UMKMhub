@@ -59,6 +59,20 @@
             </svg>
             <span>Kategori</span>
           </button>
+          <button
+            @click="setSection('reports')"
+            :class="navButtonClass('reports')"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3Z" />
+            </svg>
+            <span class="flex items-center justify-between w-full">
+              <span>Laporan</span>
+              <span v-if="pendingReportsCount > 0" class="bg-[#FA6781] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                {{ pendingReportsCount }}
+              </span>
+            </span>
+          </button>
         </nav>
 
         <div class="p-4 border-t border-white/20 space-y-1">
@@ -375,6 +389,99 @@
                 </div>
               </div>
             </aside>
+          </div>
+        </section>
+
+        <!-- Reports Section -->
+        <section v-if="activeSection === 'reports'">
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between gap-4">
+              <div>
+                <h2 class="text-lg font-bold text-gray-800">Laporan Pengguna</h2>
+                <p class="text-sm text-gray-500 mt-1">Daftar laporan kesalahan data atau toko tutup dari warga.</p>
+              </div>
+              <span class="text-sm font-semibold text-[#FA6781] bg-[#FA6781]/10 rounded-full px-3 py-1">
+                {{ umkmStore.reports?.length || 0 }} laporan
+              </span>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead>
+                  <tr class="bg-gray-50 border-b border-gray-100">
+                    <th class="text-left px-6 py-4 font-semibold text-gray-600">Tanggal</th>
+                    <th class="text-left px-6 py-4 font-semibold text-gray-600">Nama Usaha</th>
+                    <th class="text-left px-6 py-4 font-semibold text-gray-600">Tipe Laporan</th>
+                    <th class="text-left px-6 py-4 font-semibold text-gray-600">Keterangan</th>
+                    <th class="text-left px-6 py-4 font-semibold text-gray-600">Status</th>
+                    <th class="text-center px-6 py-4 font-semibold text-gray-600">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="rep in umkmStore.reports"
+                    :key="rep.id"
+                    class="border-b border-gray-50 hover:bg-[#FAE7CB]/20 transition-colors duration-150"
+                  >
+                    <td class="px-6 py-4 text-gray-500">
+                      {{ new Date(rep.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) }}
+                    </td>
+                    <td class="px-6 py-4 font-semibold text-gray-800">
+                      {{ rep.namaUsaha }}
+                    </td>
+                    <td class="px-6 py-4">
+                      <span
+                        :class="rep.tipe === 'toko_tutup' ? 'bg-[#FA6781]/10 text-[#FA6781]' : 'bg-[#FFC94D]/20 text-[#c28c00]'"
+                        class="px-2.5 py-1 rounded-full text-xs font-semibold"
+                      >
+                        {{ rep.tipe === 'toko_tutup' ? 'Toko Tutup' : 'Kesalahan Data' }}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 text-gray-600 max-w-sm whitespace-normal break-words">
+                      {{ rep.detail || '-' }}
+                    </td>
+                    <td class="px-6 py-4">
+                      <span
+                        :class="rep.status === 'resolved' ? 'bg-[#59B292]/10 text-[#59B292]' : 'bg-gray-100 text-gray-500'"
+                        class="px-2.5 py-1 rounded-full text-xs font-semibold"
+                      >
+                        {{ rep.status === 'resolved' ? 'Selesai' : 'Baru' }}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center justify-center gap-2">
+                        <button
+                          v-if="rep.status === 'pending'"
+                          @click="resolveReport(rep.id)"
+                          class="px-3 py-1.5 rounded-lg bg-[#59B292]/10 text-[#59B292] hover:bg-[#59B292] hover:text-white transition-all text-xs font-bold"
+                        >
+                          Tandai Selesai
+                        </button>
+                        <button
+                          @click="deleteReport(rep.id)"
+                          class="p-1.5 rounded-lg text-[#FA6781] hover:bg-[#FA6781]/10 transition-colors"
+                          title="Hapus Laporan"
+                        >
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 7-.9 12.1A2 2 0 0 1 16.1 21H7.9a2 2 0 0 1-2-1.9L5 7m5 4v6m4-6v6m1-10V4a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr v-if="!umkmStore.reports || umkmStore.reports.length === 0">
+                    <td colspan="6" class="px-6 py-16 text-center">
+                      <div class="flex flex-col items-center gap-3">
+                        <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2" />
+                        </svg>
+                        <p class="text-gray-500 font-medium">Tidak ada laporan masuk</p>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
       </main>
@@ -724,9 +831,14 @@ const pageTitle = computed(() => {
   const titles = {
     dashboard: 'Dashboard Overview',
     manage: 'Kelola UMKM',
-    categories: 'Kelola Kategori'
+    categories: 'Kelola Kategori',
+    reports: 'Laporan Pengguna'
   }
   return titles[activeSection.value] || 'UMKM Admin'
+})
+
+const pendingReportsCount = computed(() => {
+  return umkmStore.reports?.filter(r => r.status === 'pending').length || 0
 })
 
 const categoryDistribution = computed(() => {
@@ -915,6 +1027,20 @@ function confirmDelete() {
   }
   showDeleteModal.value = false
   deleteTarget.value = null
+}
+
+function resolveReport(id) {
+  const ok = umkmStore.resolveReport(id)
+  if (ok) {
+    showToast('Laporan berhasil ditandai selesai.')
+  }
+}
+
+function deleteReport(id) {
+  const ok = umkmStore.deleteReport(id)
+  if (ok) {
+    showToast('Laporan berhasil dihapus.')
+  }
 }
 
 function showToast(message, type = 'success') {

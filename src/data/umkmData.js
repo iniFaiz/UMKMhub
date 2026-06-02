@@ -3,6 +3,7 @@ import { reactive } from 'vue'
 // Reactive store for UMKM data
 export const umkmStore = reactive({
   categories: ['Makanan', 'Minuman', 'Fashion', 'Kerajinan', 'Jasa'],
+  reports: JSON.parse(localStorage.getItem('umkm-reports') || '[]'),
   umkmList: [
     {
       id: 1,
@@ -496,6 +497,43 @@ export const umkmStore = reactive({
     const index = this.umkmList.findIndex(u => u.id === Number(id))
     if (index !== -1) {
       this.umkmList.splice(index, 1)
+      return true
+    }
+    return false
+  },
+
+  // Add a report
+  addReport(report) {
+    const newReport = {
+      id: Date.now(),
+      umkmId: Number(report.umkmId),
+      namaUsaha: report.namaUsaha,
+      tipe: report.tipe, // 'kesalahan_data' | 'toko_tutup'
+      detail: report.detail || '',
+      tanggal: new Date().toISOString(),
+      status: 'pending' // 'pending' | 'resolved'
+    }
+    this.reports.push(newReport)
+    localStorage.setItem('umkm-reports', JSON.stringify(this.reports))
+  },
+
+  // Resolve a report
+  resolveReport(reportId) {
+    const index = this.reports.findIndex(r => r.id === Number(reportId))
+    if (index !== -1) {
+      this.reports[index].status = 'resolved'
+      localStorage.setItem('umkm-reports', JSON.stringify(this.reports))
+      return true
+    }
+    return false
+  },
+
+  // Delete a report
+  deleteReport(reportId) {
+    const index = this.reports.findIndex(r => r.id === Number(reportId))
+    if (index !== -1) {
+      this.reports.splice(index, 1)
+      localStorage.setItem('umkm-reports', JSON.stringify(this.reports))
       return true
     }
     return false
