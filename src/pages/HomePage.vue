@@ -5,11 +5,6 @@
 
       <div class="relative w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div class="rounded-3xl p-7 sm:p-10 lg:p-16 xl:p-20 lg:min-h-[calc(100vh-7rem)] lg:flex lg:flex-col lg:justify-center">
-          <div class="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-semibold mb-6 mx-auto">
-            <span class="w-2 h-2 rounded-full bg-primary"></span>
-            E-Catalog UMKM RT.33 
-          </div>
-
           <h1 class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-tight mb-6">
             <span class="text-gray-900">Temukan </span>
             <span class="gradient-text">UMKM Terbaik</span>
@@ -28,7 +23,7 @@
             <form class="relative group" @submit.prevent="handleSearch">
               <div class="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-coral rounded-2xl opacity-20 group-hover:opacity-40 blur-lg transition-opacity duration-500"></div>
               <div class="relative flex items-center bg-white rounded-2xl shadow-lg">
-                <div class="pl-5 pr-2 text-gray-400">
+                <div class="hidden sm:block pl-5 pr-2 text-gray-400">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" />
                   </svg>
@@ -37,7 +32,7 @@
                   v-model="searchState.query"
                   type="text"
                   placeholder="Cari UMKM, produk, atau kategori..."
-                  class="flex-1 py-4 px-3 bg-transparent text-gray-800 placeholder-gray-400 focus:outline-none text-base sm:text-lg min-w-0"
+                  class="flex-1 py-4 pl-5 sm:pl-3 pr-3 bg-transparent text-gray-800 placeholder-gray-400 focus:outline-none text-base sm:text-lg min-w-0"
                 />
                 <button
                   v-if="searchState.query"
@@ -50,6 +45,15 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12" />
                   </svg>
                 </button>
+                <button
+                  type="submit"
+                  class="sm:hidden mr-2 p-2.5 rounded-xl bg-gradient-to-r from-primary to-primary-dark text-white flex items-center justify-center shadow-md shadow-primary/20 active:scale-95 transition-all"
+                  aria-label="Cari"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" />
+                  </svg>
+                </button>
               </div>
             </form>
           </div>
@@ -57,11 +61,8 @@
           <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
               @click="handleSearch"
-              class="w-full sm:w-auto px-8 py-4 rounded-xl font-bold text-white text-base bg-gradient-to-r from-primary to-primary-dark hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-1 active:translate-y-0 transition-all duration-300 flex items-center justify-center gap-2"
+              class="hidden sm:flex w-full sm:w-auto px-8 py-4 rounded-xl font-bold text-white text-base bg-gradient-to-r from-primary to-primary-dark hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-1 active:translate-y-0 transition-all duration-300 items-center justify-center gap-2"
             >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" />
-              </svg>
               Cari UMKM
             </button>
             <button
@@ -330,7 +331,7 @@ const loadMore = () => {
 }
 
 const handleScroll = () => {
-  searchState.docked = window.innerWidth >= 1024 && window.scrollY > 360
+  searchState.docked = window.innerWidth >= 1024 && window.scrollY > 480
 }
 
 onMounted(() => {
