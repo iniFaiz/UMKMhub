@@ -416,28 +416,44 @@ const handleScroll = () => {
 }
 
 const placeholderText = ref('')
-const fullText = "Cari UMKM, produk, atau kategori..."
+const placeholderPhrases = [
+  "Cari UMKM, produk, atau kategori...",
+  "Cari bakso sapi jumbo...",
+  "Cari es kopi susu gula aren...",
+  "Cari kemeja batik pria...",
+  "Cari tatakan gelas set kayu jati...",
+  "Cari servis ringan motor matic...",
+  "Cari nasi rendang Padang...",
+  "Cari jamu beras kencur segar...",
+  "Cari sate ayam Madura asli...",
+  "Cari martabak manis cokelat keju..."
+]
+
+let currentPhrase = placeholderPhrases[0]
 let typeIndex = 0
 let isDeleting = false
 let typeTimeout = null
 
 const startTypewriter = () => {
   if (!isDeleting) {
-    placeholderText.value = fullText.slice(0, typeIndex + 1)
+    placeholderText.value = currentPhrase.slice(0, typeIndex + 1)
     typeIndex++
     
-    if (typeIndex === fullText.length) {
+    if (typeIndex === currentPhrase.length) {
       isDeleting = true
       typeTimeout = setTimeout(startTypewriter, 3000)
     } else {
       typeTimeout = setTimeout(startTypewriter, 100 + Math.random() * 50)
     }
   } else {
-    placeholderText.value = fullText.slice(0, typeIndex - 1)
+    placeholderText.value = currentPhrase.slice(0, typeIndex - 1)
     typeIndex--
     
     if (typeIndex === 0) {
       isDeleting = false
+      // Choose a random phrase for the next cycle without repeating the current one
+      const otherPhrases = placeholderPhrases.filter(p => p !== currentPhrase)
+      currentPhrase = otherPhrases[Math.floor(Math.random() * otherPhrases.length)]
       typeTimeout = setTimeout(startTypewriter, 500)
     } else {
       typeTimeout = setTimeout(startTypewriter, 40)
