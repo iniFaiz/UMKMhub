@@ -43,6 +43,17 @@
         <span class="text-sm font-medium">Kembali</span>
       </button>
 
+      <button
+        @click="openShareModal"
+        class="absolute top-24 right-6 z-40 flex items-center justify-center w-10 h-10 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-white hover:bg-white/25 transition-all duration-300 group"
+        aria-label="Bagikan usaha ini"
+        title="Bagikan"
+      >
+        <svg class="w-5 h-5 transition-transform duration-300 group-hover:scale-110" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 10.742l5.263-2.632m0 7.78l-5.263-2.632M20 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm-8-6a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm0 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+        </svg>
+      </button>
+
       <div class="absolute bottom-0 left-0 right-0 z-10 p-6 md:p-10 lg:p-14">
         <div class="max-w-6xl mx-auto">
           <div class="flex flex-wrap gap-2.5 mb-4">
@@ -629,6 +640,134 @@
       </Transition>
     </Teleport>
 
+    <!-- Share Modal -->
+    <Teleport to="body">
+      <Transition name="lightbox">
+        <div
+          v-if="shareModalOpen"
+          class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          @click.self="closeShareModal"
+        >
+          <div class="bg-white dark:bg-[#161a24] rounded-2xl w-full max-w-sm p-6 shadow-2xl border border-gray-100 dark:border-white/5 animate-fade-in relative">
+            <button
+              @click="closeShareModal"
+              class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors"
+              aria-label="Tutup modal"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">
+              Bagikan Usaha Ini
+            </h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
+              Bagikan detail usaha <strong>{{ umkm?.namaUsaha }}</strong> kepada teman atau keluarga Anda.
+            </p>
+
+            <!-- Share Buttons Grid -->
+            <div class="grid grid-cols-3 gap-3 mb-6">
+              <!-- WhatsApp -->
+              <a
+                :href="whatsappShareUrl"
+                target="_blank"
+                @click="closeShareModal"
+                class="flex flex-col items-center justify-center p-3 rounded-xl border border-gray-100 dark:border-white/5 bg-[#25D366]/5 dark:bg-[#25D366]/10 hover:bg-[#25D366]/15 dark:hover:bg-[#25D366]/20 transition-all duration-200 group text-center"
+              >
+                <div class="w-10 h-10 rounded-full bg-[#25D366] text-white flex items-center justify-center mb-2 shadow-sm group-hover:scale-105 transition-transform">
+                  <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.458 5.704 1.459h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                  </svg>
+                </div>
+                <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">WhatsApp</span>
+              </a>
+
+              <!-- Instagram -->
+              <button
+                @click="shareToInstagram"
+                class="flex flex-col items-center justify-center p-3 rounded-xl border border-gray-100 dark:border-white/5 bg-[#E1306C]/5 dark:bg-[#E1306C]/10 hover:bg-[#E1306C]/15 dark:hover:bg-[#E1306C]/20 transition-all duration-200 group text-center cursor-pointer"
+              >
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] text-white flex items-center justify-center mb-2 shadow-sm group-hover:scale-105 transition-transform">
+                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                    <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" />
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                  </svg>
+                </div>
+                <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">Instagram</span>
+              </button>
+
+              <!-- Facebook -->
+              <button
+                @click="shareToFacebook"
+                class="flex flex-col items-center justify-center p-3 rounded-xl border border-gray-100 dark:border-white/5 bg-[#1877F2]/5 dark:bg-[#1877F2]/10 hover:bg-[#1877F2]/15 dark:hover:bg-[#1877F2]/20 transition-all duration-200 group text-center cursor-pointer"
+              >
+                <div class="w-10 h-10 rounded-full bg-[#1877F2] text-white flex items-center justify-center mb-2 shadow-sm group-hover:scale-105 transition-transform">
+                  <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                    <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.8c4.56-.93 8-4.96 8-9.8z" />
+                  </svg>
+                </div>
+                <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">Facebook</span>
+              </button>
+
+              <!-- X (Twitter) -->
+              <a
+                :href="xShareUrl"
+                target="_blank"
+                @click="closeShareModal"
+                class="flex flex-col items-center justify-center p-3 rounded-xl border border-gray-100 dark:border-white/5 bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 transition-all duration-200 group text-center"
+              >
+                <div class="w-10 h-10 rounded-full bg-black dark:bg-white text-white dark:text-black flex items-center justify-center mb-2 shadow-sm group-hover:scale-105 transition-transform">
+                  <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                  </svg>
+                </div>
+                <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">X (Twitter)</span>
+              </a>
+
+              <!-- Telegram -->
+              <a
+                :href="telegramShareUrl"
+                target="_blank"
+                @click="closeShareModal"
+                class="flex flex-col items-center justify-center p-3 rounded-xl border border-gray-100 dark:border-white/5 bg-[#0088cc]/5 dark:bg-[#0088cc]/10 hover:bg-[#0088cc]/15 dark:hover:bg-[#0088cc]/20 transition-all duration-200 group text-center"
+              >
+                <div class="w-10 h-10 rounded-full bg-[#0088cc] text-white flex items-center justify-center mb-2 shadow-sm group-hover:scale-105 transition-transform">
+                  <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-1-.65-.35-1 .22-1.6 1.5-1.55 2.75-2.92 2.75-2.92.05-.06.08-.28-.05-.39-.12-.1-.3-.07-.32-.07-.04.01-1.84 1.23-5.2 3.5-.49.34-.94.5-1.34.49-.44-.01-1.3-.25-1.93-.46-.78-.25-1.4-.39-1.35-.83.03-.23.35-.47.96-.71 3.76-1.63 6.27-2.7 7.54-3.21 3.59-1.47 4.33-1.72 4.82-1.73.1 0 .34.03.49.15.13.1.17.24.18.34z" />
+                  </svg>
+                </div>
+                <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">Telegram</span>
+              </a>
+
+              <!-- Copy Link -->
+              <button
+                @click="copyShareLink"
+                class="flex flex-col items-center justify-center p-3 rounded-xl border border-gray-100 dark:border-white/5 bg-[#59B292]/5 dark:bg-[#59B292]/10 hover:bg-[#59B292]/15 dark:hover:bg-[#59B292]/20 transition-all duration-200 group text-center"
+              >
+                <div class="w-10 h-10 rounded-full bg-[#59B292] text-white flex items-center justify-center mb-2 shadow-sm group-hover:scale-105 transition-transform">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+                  </svg>
+                </div>
+                <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">Salin Link</span>
+              </button>
+            </div>
+
+            <div class="text-center">
+              <button
+                @click="closeShareModal"
+                class="w-full py-2.5 rounded-xl text-sm font-semibold border border-gray-200 dark:border-white/5 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer"
+              >
+                Selesai
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
     <!-- Success Toast -->
     <Transition name="toast">
       <div
@@ -640,7 +779,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7" />
           </svg>
         </div>
-        <p class="text-sm font-semibold text-gray-800 dark:text-white">Laporan Anda telah terkirim ke Pengurus RT.</p>
+        <p class="text-sm font-semibold text-gray-800 dark:text-white">{{ toastMessage }}</p>
       </div>
     </Transition>
   </div>
@@ -662,10 +801,32 @@ const reportDetail = ref('')
 const toastOpen = ref(false)
 const hasReported = ref(false)
 
+// Share Button & Modal State
+const shareModalOpen = ref(false)
+const toastMessage = ref('Laporan Anda telah terkirim ke Pengurus RT.')
+
 const wordCount = computed(() => {
   if (!reportDetail.value) return 0
   return reportDetail.value.trim().split(/\s+/).filter(Boolean).length
 })
+
+const currentUrl = computed(() => window.location.href)
+
+const whatsappShareUrl = computed(() => {
+  return `https://api.whatsapp.com/send?text=${encodeURIComponent(currentUrl.value)}`
+})
+
+const telegramShareUrl = computed(() => {
+  return `https://t.me/share/url?url=${encodeURIComponent(currentUrl.value)}`
+})
+
+// facebookShareUrl removed in favor of direct message sharing
+
+const xShareUrl = computed(() => {
+  return `https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl.value)}`
+})
+
+// LinkedIn removed as requested
 
 function checkReportedStatus() {
   if (umkm.value) {
@@ -711,11 +872,68 @@ function submitReport() {
   showToast()
 }
 
-function showToast() {
+function showToast(msg) {
+  if (msg) {
+    toastMessage.value = msg
+  } else {
+    toastMessage.value = 'Laporan Anda telah terkirim ke Pengurus RT.'
+  }
   toastOpen.value = true
   setTimeout(() => {
     toastOpen.value = false
   }, 3000)
+}
+
+function openShareModal() {
+  shareModalOpen.value = true
+  document.body.style.overflow = 'hidden'
+}
+
+function closeShareModal() {
+  shareModalOpen.value = false
+  document.body.style.overflow = ''
+}
+
+function copyShareLink() {
+  navigator.clipboard.writeText(currentUrl.value).then(() => {
+    showToast('Tautan berhasil disalin!')
+    closeShareModal()
+  }).catch(err => {
+    console.error('Gagal menyalin tautan: ', err)
+  })
+}
+
+function shareToInstagram() {
+  navigator.clipboard.writeText(currentUrl.value).then(() => {
+    showToast('Tautan disalin! Membuka DM Instagram Anda...')
+    closeShareModal()
+    window.open('https://www.instagram.com/direct/inbox/', '_blank')
+  }).catch(err => {
+    console.error('Gagal menyalin tautan: ', err)
+  })
+}
+
+function shareToFacebook() {
+  const url = currentUrl.value
+  const isLocalhost = url.includes('localhost') || url.includes('127.0.0.1')
+
+  navigator.clipboard.writeText(url).then(() => {
+    showToast('Tautan disalin! Membuka Messenger Anda...')
+    closeShareModal()
+    
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    if (isMobile) {
+      window.open(`fb-messenger://share/?link=${encodeURIComponent(url)}`, '_blank')
+    } else if (isLocalhost) {
+      // Fallback for local development testing to avoid Facebook API verification error
+      window.open('https://www.messenger.com/', '_blank')
+    } else {
+      // Official Facebook Messenger Send Dialog (works on live public whitelisted domains)
+      window.open(`https://www.facebook.com/dialog/send?app_id=291494419162&link=${encodeURIComponent(url)}&redirect_uri=${encodeURIComponent(url)}`, '_blank')
+    }
+  }).catch(err => {
+    console.error('Gagal menyalin tautan: ', err)
+  })
 }
 
 const umkm = computed(() => umkmStore.getById(route.params.id))
