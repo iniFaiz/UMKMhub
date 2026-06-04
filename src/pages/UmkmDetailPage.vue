@@ -213,6 +213,36 @@
             </div>
           </article>
 
+          <!-- Fasilitas (Status Fasilitas) -->
+          <article v-if="umkm.fasilitas && umkm.fasilitas.length" class="info-card bg-white dark:bg-[#161a24] border border-gray-100 dark:border-white/5 transition-all duration-300">
+            <h2 class="section-heading text-gray-800 dark:text-white transition-colors duration-300">
+              <span class="heading-icon bg-[#59B292]/10">
+                <svg class="w-4 h-4 text-[#59B292]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5m-4 0h4" />
+                </svg>
+              </span>
+              Fasilitas Tersedia
+            </h2>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <div
+                v-for="fasilitas in umkm.fasilitas"
+                :key="typeof fasilitas === 'object' ? fasilitas.name : fasilitas"
+                class="flex items-center gap-3 p-3.5 rounded-xl bg-gray-50/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 text-gray-700 dark:text-gray-300 hover:bg-[#59B292]/[0.03] dark:hover:bg-[#59B292]/5 transition-all duration-300 group"
+              >
+                <div class="w-8 h-8 rounded-lg bg-[#59B292]/10 text-[#59B292] group-hover:bg-[#59B292] group-hover:text-white flex items-center justify-center transition-all duration-300 shrink-0">
+                  <FacilityIcon
+                    :name="typeof fasilitas === 'object' ? fasilitas.name : fasilitas"
+                    :icon="typeof fasilitas === 'object' ? fasilitas.icon : ''"
+                    class="w-4.5 h-4.5"
+                  />
+                </div>
+                <span class="text-sm font-semibold leading-tight text-gray-800 dark:text-gray-200 group-hover:text-[#59B292] transition-colors">
+                  {{ typeof fasilitas === 'object' ? fasilitas.name : fasilitas }}
+                </span>
+              </div>
+            </div>
+          </article>
+
           <!-- Produk / Menu (Hanya Tampil di Mobile) -->
           <article class="info-card lg:hidden bg-white dark:bg-[#161a24] border border-gray-100 dark:border-white/5 transition-all duration-300">
             <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-6 flex items-center gap-2">
@@ -598,6 +628,7 @@
 import { useRoute, useRouter } from 'vue-router'
 import { computed, ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import CategoryIcon from '../components/CategoryIcon.vue'
+import FacilityIcon from '../components/FacilityIcon.vue'
 import { umkmStore, getCategoryStyle, getCategoryLightStyle } from '../data/umkmData'
 
 const route = useRoute()

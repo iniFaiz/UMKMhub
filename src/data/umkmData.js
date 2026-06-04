@@ -397,10 +397,27 @@ const defaultUmkmList = [
 ]
 
 const storedUmkm = localStorage.getItem('umkm-list')
-const initialUmkm = storedUmkm ? JSON.parse(storedUmkm) : defaultUmkmList
-if (!storedUmkm) {
-  localStorage.setItem('umkm-list', JSON.stringify(defaultUmkmList))
+let initialUmkm = storedUmkm ? JSON.parse(storedUmkm) : defaultUmkmList
+
+const defaultFacilitiesMap = {
+  1: ['Toilet', 'Tempat Parkir', 'Meja & Tempat Duduk'],
+  2: ['WiFi', 'AC', 'Toilet', 'Meja & Tempat Duduk', 'Pembayaran Non-Tunai'],
+  3: ['Toilet', 'Tempat Parkir', 'AC', 'Pembayaran Non-Tunai'],
+  4: ['Toilet', 'Tempat Parkir', 'Meja & Tempat Duduk'],
+  5: ['Toilet', 'Tempat Parkir', 'Pembayaran Non-Tunai'],
+  6: ['Tempat Parkir', 'Meja & Tempat Duduk'],
+  7: ['Toilet', 'Meja & Tempat Duduk'],
+  8: ['Toilet', 'Tempat Parkir', 'Meja & Tempat Duduk'],
+  9: ['Toilet', 'Tempat Parkir', 'WiFi', 'Meja & Tempat Duduk']
 }
+
+initialUmkm.forEach(u => {
+  if (!u.hasOwnProperty('fasilitas')) {
+    u.fasilitas = defaultFacilitiesMap[u.id] || []
+  }
+})
+
+localStorage.setItem('umkm-list', JSON.stringify(initialUmkm))
 
 // Reactive store for UMKM data
 export const umkmStore = reactive({

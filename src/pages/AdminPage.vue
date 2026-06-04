@@ -799,6 +799,87 @@
 
             <fieldset>
               <legend class="form-legend">
+                <IconFacility />
+                Status Fasilitas UMKM
+              </legend>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                <label
+                  v-for="facility in dynamicFacilities"
+                  :key="facility"
+                  class="relative flex items-center gap-2.5 p-3 border rounded-xl cursor-pointer transition-all duration-200 select-none group/fac"
+                  :class="form.fasilitas.includes(facility)
+                    ? 'border-[#59B292] bg-[#59B292]/5 text-[#59B292]'
+                    : 'border-gray-200 hover:border-gray-300 text-gray-600'"
+                >
+                  <input
+                    type="checkbox"
+                    :value="facility"
+                    v-model="form.fasilitas"
+                    class="w-4 h-4 rounded border-gray-300 text-[#59B292] focus:ring-[#59B292]"
+                  />
+                  <div class="w-5 h-5 flex items-center justify-center shrink-0">
+                    <FacilityIcon :name="facility" :icon="facilityIconMap[facility] || ''" class="w-4 h-4" />
+                  </div>
+                  <span class="text-xs sm:text-sm font-medium text-left leading-tight pr-6 truncate" :title="facility">{{ facility }}</span>
+                  
+                  <button
+                    v-if="!allFacilities.includes(facility)"
+                    type="button"
+                    @click.stop.prevent="removeCustomFacility(facility)"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-500 border border-gray-200 hover:border-red-300 dark:bg-gray-800 dark:hover:bg-red-950/30 dark:border-white/10 dark:hover:border-red-900 transition-all shadow-sm z-10"
+                    title="Hapus fasilitas kustom ini"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </label>
+              </div>
+              <div class="space-y-4">
+                <div class="flex gap-2">
+                  <input
+                    v-model="customFacilityInput"
+                    type="text"
+                    class="form-input flex-1"
+                    placeholder="Tambahkan fasilitas lainnya (misal: Live Music, Area Parkir Luas, dll)"
+                    @keydown.enter.prevent="addCustomFacility"
+                  />
+                  <button
+                    type="button"
+                    @click="addCustomFacility"
+                    class="px-5 py-2.5 bg-[#59B292] hover:bg-[#4a9e80] text-white font-semibold text-sm rounded-xl transition-all duration-200 whitespace-nowrap active:scale-[0.97]"
+                  >
+                    Tambah Fasilitas
+                  </button>
+                </div>
+                
+                <!-- 20 Template Icon Selector Grid -->
+                <div class="p-4 border border-gray-100 rounded-xl bg-gray-50/50">
+                  <label class="block text-[11px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-2.5">
+                    Pilih Icon Template untuk Fasilitas Kustom:
+                  </label>
+                  <div class="flex flex-wrap gap-2">
+                    <button
+                      v-for="icon in templateIcons"
+                      :key="icon.name"
+                      type="button"
+                      @click="selectedCustomIcon = icon.name"
+                      class="flex items-center gap-1.5 px-3 py-1.5 border rounded-full text-xs font-semibold transition-all duration-200 select-none"
+                      :class="selectedCustomIcon === icon.name
+                        ? 'border-[#59B292] bg-[#59B292] text-white shadow-sm shadow-[#59B292]/20'
+                        : 'border-gray-200 bg-white hover:border-gray-300 text-gray-600 dark:bg-[#161a24]'"
+                      :title="icon.title"
+                    >
+                      <FacilityIcon :name="''" :icon="icon.name" class="w-3.5 h-3.5" />
+                      <span>{{ icon.title }}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend class="form-legend">
                 <IconImage />
                 Foto (URL)
               </legend>
@@ -893,6 +974,7 @@
 import { computed, defineComponent, h, nextTick, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import CategoryIcon from '../components/CategoryIcon.vue'
+import FacilityIcon from '../components/FacilityIcon.vue'
 import { umkmStore, getCategoryLightStyle } from '../data/umkmData'
 
 const router = useRouter()
@@ -934,6 +1016,80 @@ const allPaymentMethods = [
   'Dana', 'Transfer Bank', 'Kartu Debit', 'Kartu Kredit'
 ]
 
+const allFacilities = [
+  'WiFi', 'Meja & Tempat Duduk', 'Toilet', 'Tempat Parkir',
+  'AC', 'Mushola', 'Area Merokok', 'Pembayaran Non-Tunai'
+]
+const dynamicFacilities = ref([...allFacilities])
+const customFacilityInput = ref('')
+const selectedCustomIcon = ref('sparkles')
+const facilityIconMap = ref({})
+
+const templateIcons = [
+  { name: 'wifi', title: 'WiFi' },
+  { name: 'seats', title: 'Meja/Kursi' },
+  { name: 'toilet', title: 'Toilet' },
+  { name: 'parking', title: 'Parkir' },
+  { name: 'ac', title: 'AC' },
+  { name: 'mushola', title: 'Mushola' },
+  { name: 'smoking', title: 'Smoking' },
+  { name: 'cashless', title: 'Cashless' },
+  { name: 'music', title: 'Musik' },
+  { name: 'plug', title: 'Colokan' },
+  { name: 'playground', title: 'Playground' },
+  { name: 'garden', title: 'Taman' },
+  { name: 'wheelchair', title: 'Akses Roda' },
+  { name: 'pet', title: 'Pet Friendly' },
+  { name: 'tv', title: 'TV/Layar' },
+  { name: 'coffee', title: 'Kopi/Teh' },
+  { name: 'book', title: 'Buku' },
+  { name: 'security', title: 'Keamanan' },
+  { name: 'bike', title: 'Sepeda' },
+  { name: 'sparkles', title: 'Menarik' }
+]
+
+function addCustomFacility() {
+  const value = customFacilityInput.value.trim()
+  if (!value) return
+  
+  // Title case capitalization for custom facilities
+  const formatted = value.replace(/\b\w/g, char => char.toUpperCase())
+  if (!dynamicFacilities.value.includes(formatted)) {
+    dynamicFacilities.value.push(formatted)
+  }
+  if (!form.fasilitas.includes(formatted)) {
+    form.fasilitas.push(formatted)
+  }
+  facilityIconMap.value[formatted] = selectedCustomIcon.value
+  customFacilityInput.value = ''
+  selectedCustomIcon.value = 'sparkles'
+}
+
+function removeCustomFacility(facilityName) {
+  const dfIndex = dynamicFacilities.value.indexOf(facilityName)
+  if (dfIndex !== -1) {
+    dynamicFacilities.value.splice(dfIndex, 1)
+  }
+  const ffIndex = form.fasilitas.indexOf(facilityName)
+  if (ffIndex !== -1) {
+    form.fasilitas.splice(ffIndex, 1)
+  }
+  delete facilityIconMap.value[facilityName]
+}
+
+function mapFacilityToIcon(name) {
+  const norm = name.toLowerCase().trim()
+  if (norm.includes('wifi')) return 'wifi'
+  if (norm.includes('meja') || norm.includes('duduk') || norm.includes('kursi') || norm.includes('seat')) return 'seats'
+  if (norm.includes('toilet') || norm.includes('restroom') || norm.includes('wc')) return 'toilet'
+  if (norm.includes('parkir') || norm.includes('parking')) return 'parking'
+  if (norm.includes('ac') || norm.includes('pendingin') || norm.includes('air conditioner')) return 'ac'
+  if (norm.includes('mushola') || norm.includes('musholla') || norm.includes('sholat') || norm.includes('prayer')) return 'mushola'
+  if (norm.includes('rokok') || norm.includes('smoking')) return 'smoking'
+  if (norm.includes('non-tunai') || norm.includes('non tunai') || norm.includes('cashless') || norm.includes('qris') || norm.includes('debit') || norm.includes('kredit') || norm.includes('card')) return 'cashless'
+  return 'sparkles'
+}
+
 const getEmptyForm = () => ({
   namaUsaha: '',
   namaPemilik: '',
@@ -945,6 +1101,7 @@ const getEmptyForm = () => ({
   jamOperasional: [{ hari: '', jam: '00:00 - 00:00' }],
   produk: [{ nama: '', harga: 0, deskripsi: '' }],
   metodePembayaran: [],
+  fasilitas: [],
   foto: { utama: '', tempat: [''], produk: [''], menu: [''] }
 })
 
@@ -1193,12 +1350,30 @@ function openAddModal() {
   isEditing.value = false
   editingId.value = null
   resetForm()
+  facilityIconMap.value = {}
+  selectedCustomIcon.value = 'sparkles'
+  dynamicFacilities.value = [...allFacilities]
   showFormModal.value = true
 }
 
 function openEditModal(item) {
   isEditing.value = true
   editingId.value = item.id
+  facilityIconMap.value = {}
+  selectedCustomIcon.value = 'sparkles'
+  dynamicFacilities.value = [...allFacilities]
+  if (item.fasilitas) {
+    item.fasilitas.forEach(f => {
+      const name = typeof f === 'object' ? f.name : f
+      const icon = typeof f === 'object' ? f.icon : ''
+      if (!dynamicFacilities.value.includes(name)) {
+        dynamicFacilities.value.push(name)
+      }
+      if (icon) {
+        facilityIconMap.value[name] = icon
+      }
+    })
+  }
   Object.assign(form, {
     namaUsaha: item.namaUsaha || '',
     namaPemilik: item.namaPemilik || '',
@@ -1219,6 +1394,9 @@ function openEditModal(item) {
       ? item.produk.map(produk => ({ ...produk }))
       : [{ nama: '', harga: 0, deskripsi: '' }],
     metodePembayaran: item.metodePembayaran ? [...item.metodePembayaran] : [],
+    fasilitas: item.fasilitas
+      ? item.fasilitas.map(f => typeof f === 'object' ? f.name : f)
+      : [],
     foto: {
       utama: item.foto?.utama || '',
       tempat: item.foto?.tempat?.length ? [...item.foto.tempat] : [''],
@@ -1293,6 +1471,10 @@ function saveUmkm() {
     jamOperasional: form.jamOperasional.filter(jam => jam.hari.trim() || jam.jam.trim()),
     produk: form.produk.filter(produk => produk.nama.trim()),
     metodePembayaran: [...form.metodePembayaran],
+    fasilitas: form.fasilitas.map(name => {
+      const icon = facilityIconMap.value[name] || mapFacilityToIcon(name)
+      return { name, icon }
+    }),
     foto: {
       utama: form.foto.utama.trim(),
       tempat: form.foto.tempat.filter(url => url.trim()),
@@ -1509,6 +1691,7 @@ const IconCard = createSvgIcon('M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 0 0 3-3V8a3 
 const IconImage = createSvgIcon('M4 16l4.6-4.6a2 2 0 0 1 2.8 0L16 16m-2-2 1.6-1.6a2 2 0 0 1 2.8 0L20 14m-6-6h.01M6 20h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z')
 const IconPlus = createSvgIcon('M12 4v16m8-8H4')
 const IconTrash = createSvgIcon('m19 7-.9 12.1A2 2 0 0 1 16.1 21H7.9a2 2 0 0 1-2-1.9L5 7m5 4v6m4-6v6m1-10V4a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v3M4 7h16')
+const IconFacility = createSvgIcon('M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5m-4 0h4')
 
 const UrlList = defineComponent({
   props: {
