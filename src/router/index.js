@@ -5,6 +5,7 @@ import SearchResultPage from '../pages/SearchResultPage.vue'
 import AdminPage from '../pages/AdminPage.vue'
 import AdminLoginPage from '../pages/AdminLoginPage.vue'
 import TermsPage from '../pages/TermsPage.vue'
+import PrivacyPage from '../pages/PrivacyPage.vue'
 
 const routes = [
   {
@@ -26,6 +27,11 @@ const routes = [
     path: '/syarat-ketentuan',
     name: 'Terms',
     component: TermsPage
+  },
+  {
+    path: '/kebijakan-privasi',
+    name: 'Privacy',
+    component: PrivacyPage
   },
   {
     path: '/admin',
