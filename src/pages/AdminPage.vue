@@ -1270,9 +1270,16 @@ function saveUmkm() {
   }
 
   // Validate Google Maps URL if provided
-  if (form.mapsEmbed.trim() && !isValidGoogleMapsUrl(form.mapsEmbed)) {
-    showToast('Tautan Google Maps tidak valid. Harus berupa tautan Google Maps asli (share link atau iframe embed).', 'error')
-    return
+  if (form.mapsEmbed.trim()) {
+    const mapsVal = form.mapsEmbed.trim().toLowerCase()
+    if (mapsVal.includes('maps.app.goo.gl') || mapsVal.includes('goo.gl/maps') || mapsVal.includes('goo.gl')) {
+      showToast('Tautan pendek Google Maps (maps.app.goo.gl) tidak bisa dimuat secara langsung karena pembatasan dari Google. Silakan klik "Bagikan" -> "Sematkan peta" di Google Maps lalu salin kode HTML-nya, atau gunakan koordinat (contoh: -6.8893, 107.5962).', 'error')
+      return
+    }
+    if (!isValidGoogleMapsUrl(form.mapsEmbed)) {
+      showToast('Tautan Google Maps tidak valid. Harus berupa kode HTML iframe atau tautan Google Maps asli yang berisi koordinat.', 'error')
+      return
+    }
   }
 
   const data = {
@@ -1401,6 +1408,12 @@ function normalizeMapEmbed(value) {
     return raw
   }
 
+  // Extract coordinates from long URL path (e.g. /@latitude,longitude)
+  const pathCoords = raw.match(/@(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/)
+  if (pathCoords) {
+    return `https://www.google.com/maps?q=${pathCoords[1]},${pathCoords[2]}&output=embed`
+  }
+
   const coords = raw.match(/(-?\d{1,2}\.\d+)\s*,\s*(-?\d{1,3}\.\d+)/)
   if (coords) {
     return `https://www.google.com/maps?q=${coords[1]},${coords[2]}&output=embed`
@@ -1408,12 +1421,14 @@ function normalizeMapEmbed(value) {
 
   try {
     const url = new URL(raw)
-    if (url.hostname.includes('google.') || url.hostname === 'maps.app.goo.gl') {
+    if (url.hostname.includes('google.')) {
       const query = url.searchParams.get('q') || url.searchParams.get('query')
-      return `https://www.google.com/maps?q=${encodeURIComponent(query || raw)}&output=embed`
+      if (query) {
+        return `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed`
+      }
     }
   } catch {
-    // Plain text is treated as an address.
+    // Treat as query below
   }
 
   return `https://www.google.com/maps?q=${encodeURIComponent(raw)}&output=embed`
@@ -1423,6 +1438,11 @@ function isValidGoogleMapsUrl(value) {
   const input = (value || '').trim()
   if (!input) return true
 
+  // If it's short, it is invalid for embed
+  if (input.includes('maps.app.goo.gl') || input.includes('goo.gl/maps') || input.includes('goo.gl')) {
+    return false
+  }
+
   const iframeSrc = input.match(/src=["']([^"']+)["']/i)?.[1]
   const rawUrl = iframeSrc || input
 
@@ -1430,12 +1450,11 @@ function isValidGoogleMapsUrl(value) {
     const url = new URL(rawUrl)
     const hostname = url.hostname.toLowerCase()
     
-    return (hostname.includes('google.') && url.pathname.includes('/maps')) ||
-           (hostname === 'maps.google.com') ||
-           (hostname === 'maps.app.goo.gl') ||
-           (hostname === 'goo.gl' && url.pathname.startsWith('/maps'))
+    return (hostname.includes('google.') && (url.pathname.includes('/maps') || url.pathname.includes('/embed'))) ||
+           (hostname === 'maps.google.com')
   } catch (e) {
-    return false
+    // If it's coordinate text, accept it
+    return /^(-?\d{1,2}\.\d+)\s*,\s*(-?\d{1,3}\.\d+)$/.test(input)
   }
 }
 

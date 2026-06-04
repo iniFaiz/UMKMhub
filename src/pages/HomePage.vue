@@ -10,7 +10,7 @@
             <span
               @click="handleEasterEgg"
               class="gradient-text cursor-pointer select-none active:scale-95 inline-block transition-transform duration-100"
-              title="Easter Egg! Klik 3 kali"
+              title="Touch me"
             >
               UMKM Terbaik
             </span>

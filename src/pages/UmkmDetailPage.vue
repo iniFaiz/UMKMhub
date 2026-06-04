@@ -730,6 +730,12 @@ function normalizeMapEmbed(value) {
     return raw
   }
 
+  // Extract coordinates from long URL path (e.g. /@latitude,longitude)
+  const pathCoords = raw.match(/@(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/)
+  if (pathCoords) {
+    return `https://www.google.com/maps?q=${pathCoords[1]},${pathCoords[2]}&output=embed`
+  }
+
   const coords = raw.match(/(-?\d{1,2}\.\d+)\s*,\s*(-?\d{1,3}\.\d+)/)
   if (coords) {
     return `https://www.google.com/maps?q=${coords[1]},${coords[2]}&output=embed`
@@ -737,12 +743,14 @@ function normalizeMapEmbed(value) {
 
   try {
     const url = new URL(raw)
-    if (url.hostname.includes('google.') || url.hostname === 'maps.app.goo.gl') {
+    if (url.hostname.includes('google.')) {
       const query = url.searchParams.get('q') || url.searchParams.get('query')
-      return `https://www.google.com/maps?q=${encodeURIComponent(query || raw)}&output=embed`
+      if (query) {
+        return `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed`
+      }
     }
   } catch {
-    // Non-URL text is treated as an address/search query.
+    // Treat as query below
   }
 
   return `https://www.google.com/maps?q=${encodeURIComponent(raw)}&output=embed`
