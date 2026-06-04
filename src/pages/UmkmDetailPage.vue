@@ -45,13 +45,23 @@
 
       <div class="absolute bottom-0 left-0 right-0 z-10 p-6 md:p-10 lg:p-14">
         <div class="max-w-6xl mx-auto">
-          <span
-            class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold mb-4 shadow-lg transition-all duration-300"
-            :style="getCategoryStyle(umkm.kategori)"
-          >
-            <CategoryIcon :name="umkm.kategori" class="w-4 h-4" />
-            {{ umkm.kategori }}
-          </span>
+          <div class="flex flex-wrap gap-2.5 mb-4">
+            <span
+              class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold shadow-lg transition-all duration-300"
+              :style="getCategoryStyle(umkm.kategori)"
+            >
+              <CategoryIcon :name="umkm.kategori" class="w-4 h-4" />
+              {{ umkm.kategori }}
+            </span>
+            <span
+              class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-semibold shadow-lg backdrop-blur-md text-white transition-all duration-300"
+              :class="operationalStatus.status === 'closing_soon'
+                ? 'bg-orange-500/90 dark:bg-orange-600/90'
+                : (operationalStatus.isOpen ? 'bg-green-500/90 dark:bg-green-600/90' : 'bg-red-500/90 dark:bg-red-600/90')"
+            >
+              <span>{{ operationalStatus.status === 'closing_soon' ? 'Tutup Segera' : (operationalStatus.isOpen ? 'Buka' : 'Tutup') }}</span>
+            </span>
+          </div>
           <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-3 leading-tight drop-shadow-lg">
             {{ umkm.namaUsaha }}
           </h1>
@@ -158,13 +168,25 @@
           </article>
 
           <article class="info-card bg-white dark:bg-[#161a24] border border-gray-100 dark:border-white/5 transition-all duration-300">
-            <h2 class="section-heading text-gray-800 dark:text-white transition-colors duration-300">
-              <span class="heading-icon bg-[#59B292]/10">
-                <svg class="w-4 h-4 text-[#59B292]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                </svg>
+            <h2 class="section-heading flex items-center justify-between gap-4 text-gray-800 dark:text-white transition-colors duration-300">
+              <span class="flex items-center gap-2">
+                <span class="heading-icon bg-[#59B292]/10">
+                  <svg class="w-4 h-4 text-[#59B292]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                  </svg>
+                </span>
+                <span>Jam Operasional</span>
               </span>
-              Jam Operasional
+              <span
+                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold shadow-sm"
+                :class="operationalStatus.status === 'closing_soon'
+                  ? 'bg-orange-100 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400'
+                  : (operationalStatus.isOpen
+                      ? 'bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400'
+                      : 'bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400')"
+              >
+                <span>{{ operationalStatus.status === 'closing_soon' ? 'Tutup Segera' : (operationalStatus.isOpen ? 'Buka Sekarang' : 'Tutup Sekarang') }}</span>
+              </span>
             </h2>
             <div class="overflow-hidden rounded-xl border border-gray-100 dark:border-white/5">
               <table class="w-full">
@@ -629,7 +651,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { computed, ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import CategoryIcon from '../components/CategoryIcon.vue'
 import FacilityIcon from '../components/FacilityIcon.vue'
-import { umkmStore, getCategoryStyle, getCategoryLightStyle } from '../data/umkmData'
+import { umkmStore, getCategoryStyle, getCategoryLightStyle, checkOperationalStatus } from '../data/umkmData'
 
 const route = useRoute()
 const router = useRouter()
@@ -697,6 +719,10 @@ function showToast() {
 }
 
 const umkm = computed(() => umkmStore.getById(route.params.id))
+const operationalStatus = computed(() => {
+  if (!umkm.value) return { isOpen: false, text: 'Tutup' }
+  return checkOperationalStatus(umkm.value.jamOperasional)
+})
 const heroLoaded = ref(false)
 const lightboxOpen = ref(false)
 const currentPhotoIndex = ref(0)

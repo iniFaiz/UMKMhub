@@ -648,3 +648,120 @@ export const getCategoryLightColor = (kategori) => {
   return colors[kategori] || 'bg-gray-100 text-gray-600'
 }
 
+export const checkOperationalStatus = (jamOperasional) => {
+  if (!jamOperasional || !jamOperasional.length) {
+    return { isOpen: false, status: 'closed', text: 'Tutup' }
+  }
+
+  const daysOfWeek = ['minggu', 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu']
+  const daySequence = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu']
+  
+  const now = new Date()
+  const currentDayIndex = now.getDay()
+  const currentDayName = daysOfWeek[currentDayIndex]
+  const currentMin = now.getHours() * 60 + now.getMinutes()
+
+  let scheduleToday = null
+
+  for (const entry of jamOperasional) {
+    const hariStr = entry.hari.toLowerCase().trim()
+    
+    if (hariStr.includes('-') || hariStr.includes('–')) {
+      const parts = hariStr.split(/[-–]/).map(p => p.trim())
+      if (parts.length === 2) {
+        const startIdx = daySequence.indexOf(parts[0])
+        const endIdx = daySequence.indexOf(parts[1])
+        const currentSeqIdx = daySequence.indexOf(currentDayName)
+        
+        if (startIdx !== -1 && endIdx !== -1 && currentSeqIdx !== -1) {
+          let matches = false
+          if (startIdx <= endIdx) {
+            matches = currentSeqIdx >= startIdx && currentSeqIdx <= endIdx
+          } else {
+            // wraps around (e.g. Jumat - Senin)
+            matches = currentSeqIdx >= startIdx || currentSeqIdx <= endIdx
+          }
+          
+          if (matches) {
+            scheduleToday = entry
+            break
+          }
+        }
+      }
+    } else if (hariStr === currentDayName) {
+      scheduleToday = entry
+      break
+    }
+  }
+
+  if (!scheduleToday) {
+    return { isOpen: false, status: 'closed', text: 'Tutup' }
+  }
+
+  const jamStr = scheduleToday.jam.trim()
+  if (jamStr.toLowerCase() === 'tutup') {
+    return { isOpen: false, status: 'closed', text: 'Tutup' }
+  }
+  if (jamStr.toLowerCase() === 'buka 24 jam') {
+    return { isOpen: true, status: 'open', text: 'Buka 24 Jam' }
+  }
+
+  // Parse time range (HH:MM - HH:MM)
+  const timeParts = jamStr.split(/[-–]/).map(t => t.trim())
+  if (timeParts.length === 2) {
+    const parseTime = (str) => {
+      const [h, m] = str.split(':').map(Number)
+      return h * 60 + m
+    }
+    try {
+      const startMin = parseTime(timeParts[0])
+      const endMin = parseTime(timeParts[1])
+
+      let isOpen = false
+      let remainingMin = 0
+
+      if (startMin <= endMin) {
+        isOpen = currentMin >= startMin && currentMin <= endMin
+        if (isOpen) {
+          remainingMin = endMin - currentMin
+        }
+      } else {
+        // wraps past midnight (e.g. 16:00 - 02:00 -> startMin=960, endMin=120)
+        isOpen = currentMin >= startMin || currentMin <= endMin
+        if (isOpen) {
+          if (currentMin >= startMin) {
+            remainingMin = (1440 - currentMin) + endMin
+          } else {
+            remainingMin = endMin - currentMin
+          }
+        }
+      }
+
+      if (isOpen) {
+        if (remainingMin > 0 && remainingMin <= 30) {
+          return {
+            isOpen: true,
+            status: 'closing_soon',
+            text: 'Tutup Segera'
+          }
+        }
+        return {
+          isOpen: true,
+          status: 'open',
+          text: 'Buka'
+        }
+      } else {
+        return {
+          isOpen: false,
+          status: 'closed',
+          text: 'Tutup'
+        }
+      }
+    } catch (e) {
+      return { isOpen: false, status: 'closed', text: 'Tutup' }
+    }
+  }
+
+  return { isOpen: false, status: 'closed', text: 'Tutup' }
+}
+
