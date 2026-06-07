@@ -8,7 +8,9 @@ export const homeSearchState = reactive({
 export const themeState = reactive({
   theme: 'auto',
   isDark: false,
-  forceLightMode: false
+  forceLightMode: false,
+  isRaining: false,
+  isRainingManuallyToggled: false
 })
 
 export function applyTheme(theme) {
@@ -27,12 +29,23 @@ export function applyTheme(theme) {
     shouldBeDark = false
   }
   
+  const wasDark = themeState.isDark
   themeState.isDark = shouldBeDark
   
   if (shouldBeDark) {
     document.documentElement.classList.add('dark')
+    // Trigger 10% chance of rain if transitioning from light to dark
+    if (!wasDark && !themeState.isRaining) {
+      if (Math.random() < 0.10) {
+        themeState.isRaining = true
+      }
+    }
   } else {
     document.documentElement.classList.remove('dark')
+    // Turn off rain effect when leaving dark mode if it was NOT manually toggled
+    if (!themeState.isRainingManuallyToggled) {
+      themeState.isRaining = false
+    }
   }
 }
 
@@ -98,6 +111,8 @@ export function setThemeWithAnimation(newTheme, event) {
 if (typeof window !== 'undefined') {
   // Set initial state
   const initialTheme = localStorage.getItem('theme') || 'auto'
+  themeState.isRainingManuallyToggled = localStorage.getItem('isRainingManuallyToggled') === 'true'
+  themeState.isRaining = themeState.isRainingManuallyToggled
   
   let shouldBeDark = false
   if (initialTheme === 'auto') {

@@ -6,6 +6,7 @@ import AdminPage from '../pages/AdminPage.vue'
 import AdminLoginPage from '../pages/AdminLoginPage.vue'
 import TermsPage from '../pages/TermsPage.vue'
 import PrivacyPage from '../pages/PrivacyPage.vue'
+import AchievementsPage from '../pages/AchievementsPage.vue'
 import { themeState, applyTheme } from '../stores/uiState'
 
 const routes = [
@@ -33,6 +34,11 @@ const routes = [
     path: '/kebijakan-privasi',
     name: 'Privacy',
     component: PrivacyPage
+  },
+  {
+    path: '/achievements',
+    name: 'Achievements',
+    component: AchievementsPage
   },
   {
     path: '/admin',

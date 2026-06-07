@@ -15,6 +15,7 @@ watch(query, (newQuery) => {
   const q = (newQuery || '').trim().toLowerCase()
   if (q === '67' || q === '6-7' || q === 'six seven') {
     easterEggClass.value = 'animate-egg-67'
+    localStorage.setItem('achievement_67', 'true')
     setTimeout(() => {
       if (easterEggClass.value === 'animate-egg-67') {
         easterEggClass.value = ''
@@ -22,6 +23,7 @@ watch(query, (newQuery) => {
     }, 4000)
   } else if (q === 'do a barrel roll') {
     easterEggClass.value = 'animate-barrel-roll'
+    localStorage.setItem('achievement_barrel_roll', 'true')
     setTimeout(() => {
       if (easterEggClass.value === 'animate-barrel-roll') {
         easterEggClass.value = ''
