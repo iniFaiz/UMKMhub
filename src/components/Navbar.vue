@@ -25,9 +25,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center gap-4 h-16 lg:h-20">
         <router-link to="/" class="flex items-center gap-2 group shrink-0">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-all duration-300 group-hover:scale-105">
-            <span class="text-white font-bold text-lg">U</span>
-          </div>
+          <img src="/logo.svg" alt="UMKMHub Logo" class="w-10 h-10 object-contain transition-all duration-300 group-hover:scale-105" />
           <div class="flex flex-col">
             <span class="text-lg font-bold tracking-tight text-gray-900 dark:text-white">
               UMKM<span class="text-primary">Hub</span>

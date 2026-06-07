@@ -6,6 +6,7 @@ import AdminPage from '../pages/AdminPage.vue'
 import AdminLoginPage from '../pages/AdminLoginPage.vue'
 import TermsPage from '../pages/TermsPage.vue'
 import PrivacyPage from '../pages/PrivacyPage.vue'
+import { themeState, applyTheme } from '../stores/uiState'
 
 const routes = [
   {
@@ -60,6 +61,16 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
+  // Force light mode on admin pages, otherwise restore preferred theme
+  if (to.path.startsWith('/admin')) {
+    themeState.forceLightMode = true
+    document.documentElement.classList.remove('dark')
+  } else {
+    themeState.forceLightMode = false
+    const storedTheme = localStorage.getItem('theme') || 'auto'
+    applyTheme(themeState.theme || storedTheme)
+  }
+
   if (to.meta.requiresAdmin && sessionStorage.getItem('umkm-admin-auth') !== 'true') {
     return { name: 'AdminLogin', query: { redirect: to.fullPath } }
   }

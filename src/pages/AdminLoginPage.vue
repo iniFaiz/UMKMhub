@@ -9,10 +9,8 @@
       </router-link>
 
       <div class="mb-8">
-        <div class="w-12 h-12 rounded-xl bg-[#59B292]/10 text-[#59B292] flex items-center justify-center mb-4">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2Zm10-10V7a4 4 0 0 0-8 0v4" />
-          </svg>
+        <div class="w-12 h-12 rounded-xl bg-[#59B292]/10 flex items-center justify-center p-2 mb-4">
+          <img src="/logo.svg" alt="UMKMHub Logo" class="w-full h-full object-contain" />
         </div>
         <h1 class="text-2xl font-extrabold text-gray-900 dark:text-white">Login Admin</h1>
         <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Masukkan email dan password untuk membuka panel admin.</p>

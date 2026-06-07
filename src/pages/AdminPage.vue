@@ -19,10 +19,8 @@
       >
         <div class="p-6 border-b border-white/20">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9.5 12 4l9 5.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5Z" />
-              </svg>
+            <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center p-1.5 shrink-0">
+              <img src="/logo.svg" alt="UMKMHub Logo" class="w-full h-full object-contain" />
             </div>
             <div>
               <h2 class="font-bold text-lg leading-tight">UMKM Admin</h2>

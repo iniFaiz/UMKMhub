@@ -7,7 +7,8 @@ export const homeSearchState = reactive({
 
 export const themeState = reactive({
   theme: 'auto',
-  isDark: false
+  isDark: false,
+  forceLightMode: false
 })
 
 export function applyTheme(theme) {
@@ -19,6 +20,11 @@ export function applyTheme(theme) {
     shouldBeDark = window.matchMedia('(prefers-color-scheme: dark)').matches
   } else {
     shouldBeDark = theme === 'dark'
+  }
+  
+  // Force light mode on admin pages if requested
+  if (themeState.forceLightMode) {
+    shouldBeDark = false
   }
   
   themeState.isDark = shouldBeDark
