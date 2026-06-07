@@ -128,29 +128,29 @@
               Kontak
             </h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <a :href="'tel:' + umkm.kontak.telepon" class="contact-card bg-[#f9fafb] dark:bg-[#0d0f14] hover:bg-primary/5 dark:hover:bg-primary/10 border border-transparent dark:border-white/5 transition-colors duration-300 cursor-pointer">
+              <a :href="sanitizeUrl('tel:' + umkm.kontak.telepon)" class="contact-card bg-[#f9fafb] dark:bg-[#0d0f14] hover:bg-primary/5 dark:hover:bg-primary/10 border border-transparent dark:border-white/5 transition-colors duration-300 cursor-pointer">
                 <span class="contact-icon bg-[#59B292]/10 text-[#59B292]">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.4 19.4 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.7.6 2.5a2 2 0 0 1-.5 2.1L8 9.5a16 16 0 0 0 6.5 6.5l1.2-1.2a2 2 0 0 1 2.1-.5c.8.3 1.6.5 2.5.6a2 2 0 0 1 1.7 2Z" />
                   </svg>
                 </span>
                 <span class="min-w-0">
-                  <span class="contact-label text-gray-400 dark:text-gray-500 transition-colors duration-300">Telepon</span>
+                  <span class="contact-label text-gray-400 dark:text-gray-550 transition-colors duration-300">Telepon</span>
                   <span class="contact-value text-gray-800 dark:text-gray-100 transition-colors duration-300">{{ umkm.kontak.telepon }}</span>
                 </span>
               </a>
-              <a :href="'https://wa.me/' + umkm.kontak.whatsapp.replace(/[^0-9]/g, '')" target="_blank" class="contact-card bg-[#f9fafb] dark:bg-[#0d0f14] hover:bg-green-500/10 border border-transparent dark:border-white/5 transition-colors duration-300 cursor-pointer">
+              <a :href="sanitizeUrl('https://wa.me/' + umkm.kontak.whatsapp.replace(/[^0-9]/g, ''))" target="_blank" class="contact-card bg-[#f9fafb] dark:bg-[#0d0f14] hover:bg-green-500/10 border border-transparent dark:border-white/5 transition-colors duration-300 cursor-pointer">
                 <span class="contact-icon bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-400">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5l1.5-3A7 7 0 1 1 9 16Z" />
                   </svg>
                 </span>
                 <span class="min-w-0">
-                  <span class="contact-label text-gray-400 dark:text-gray-500 transition-colors duration-300">WhatsApp</span>
+                  <span class="contact-label text-gray-400 dark:text-gray-550 transition-colors duration-300">WhatsApp</span>
                   <span class="contact-value text-gray-800 dark:text-gray-100 transition-colors duration-300">{{ umkm.kontak.whatsapp }}</span>
                 </span>
               </a>
-              <a :href="'https://instagram.com/' + umkm.kontak.instagram.replace('@', '')" target="_blank" class="contact-card bg-[#f9fafb] dark:bg-[#0d0f14] hover:bg-pink-500/10 border border-transparent dark:border-white/5 transition-colors duration-300 cursor-pointer">
+              <a :href="sanitizeUrl('https://instagram.com/' + umkm.kontak.instagram.replace('@', ''))" target="_blank" class="contact-card bg-[#f9fafb] dark:bg-[#0d0f14] hover:bg-pink-500/10 border border-transparent dark:border-white/5 transition-colors duration-300 cursor-pointer">
                 <span class="contact-icon bg-pink-100 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <rect x="4" y="4" width="16" height="16" rx="4" />
@@ -159,11 +159,11 @@
                   </svg>
                 </span>
                 <span class="min-w-0">
-                  <span class="contact-label text-gray-400 dark:text-gray-500 transition-colors duration-300">Instagram</span>
+                  <span class="contact-label text-gray-400 dark:text-gray-550 transition-colors duration-300">Instagram</span>
                   <span class="contact-value text-gray-800 dark:text-gray-100 transition-colors duration-300">{{ umkm.kontak.instagram }}</span>
                 </span>
               </a>
-              <a :href="'mailto:' + umkm.kontak.email" class="contact-card bg-[#f9fafb] dark:bg-[#0d0f14] hover:bg-blue-500/10 border border-transparent dark:border-white/5 transition-colors duration-300 cursor-pointer">
+              <a :href="sanitizeUrl('mailto:' + umkm.kontak.email)" class="contact-card bg-[#f9fafb] dark:bg-[#0d0f14] hover:bg-blue-500/10 border border-transparent dark:border-white/5 transition-colors duration-300 cursor-pointer">
                 <span class="contact-icon bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m4 6 8 6 8-6" />
@@ -171,7 +171,7 @@
                   </svg>
                 </span>
                 <span class="min-w-0">
-                  <span class="contact-label text-gray-400 dark:text-gray-500 transition-colors duration-300">Email</span>
+                  <span class="contact-label text-gray-400 dark:text-gray-550 transition-colors duration-300">Email</span>
                   <span class="contact-value text-gray-800 dark:text-gray-100 transition-colors duration-300">{{ umkm.kontak.email }}</span>
                 </span>
               </a>
@@ -790,7 +790,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { computed, ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import CategoryIcon from '../components/CategoryIcon.vue'
 import FacilityIcon from '../components/FacilityIcon.vue'
-import { umkmStore, getCategoryStyle, getCategoryLightStyle, checkOperationalStatus } from '../data/umkmData'
+import { umkmStore, getCategoryStyle, getCategoryLightStyle, checkOperationalStatus, sanitizeUrl } from '../data/umkmData'
 
 const route = useRoute()
 const router = useRouter()

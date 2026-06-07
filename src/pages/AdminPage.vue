@@ -975,7 +975,7 @@ import { computed, defineComponent, h, nextTick, onMounted, onUnmounted, reactiv
 import { useRouter } from 'vue-router'
 import CategoryIcon from '../components/CategoryIcon.vue'
 import FacilityIcon from '../components/FacilityIcon.vue'
-import { umkmStore, getCategoryLightStyle } from '../data/umkmData'
+import { umkmStore, getCategoryLightStyle, sanitizeUrl } from '../data/umkmData'
 
 const router = useRouter()
 const sidebarOpen = ref(false)
@@ -1476,10 +1476,10 @@ function saveUmkm() {
       return { name, icon }
     }),
     foto: {
-      utama: form.foto.utama.trim(),
-      tempat: form.foto.tempat.filter(url => url.trim()),
-      produk: form.foto.produk.filter(url => url.trim()),
-      menu: form.foto.menu.filter(url => url.trim())
+      utama: sanitizeUrl(form.foto.utama.trim()),
+      tempat: form.foto.tempat.filter(url => url.trim()).map(url => sanitizeUrl(url)),
+      produk: form.foto.produk.filter(url => url.trim()).map(url => sanitizeUrl(url)),
+      menu: form.foto.menu.filter(url => url.trim()).map(url => sanitizeUrl(url))
     }
   }
 

@@ -765,3 +765,30 @@ export const checkOperationalStatus = (jamOperasional) => {
   return { isOpen: false, status: 'closed', text: 'Tutup' }
 }
 
+export const sanitizeUrl = (url, allowedProtocols = ['http:', 'https:', 'mailto:', 'tel:']) => {
+  if (!url) return ''
+  const trimmed = url.trim()
+  
+  if (trimmed.startsWith('//')) {
+    return trimmed
+  }
+
+  if (!trimmed.includes(':') && !trimmed.includes('/') && !trimmed.includes('?')) {
+    return trimmed
+  }
+
+  try {
+    const parsed = new URL(trimmed)
+    if (allowedProtocols.includes(parsed.protocol.toLowerCase())) {
+      return trimmed
+    }
+  } catch (e) {
+    const hasProtocol = /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(trimmed)
+    if (!hasProtocol) {
+      return trimmed
+    }
+  }
+  return '#'
+}
+
+

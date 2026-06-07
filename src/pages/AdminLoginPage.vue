@@ -47,7 +47,8 @@
 
         <button
           type="submit"
-          class="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#59B292] text-white font-bold hover:bg-[#478f76] active:scale-[0.98] transition-all duration-200"
+          :disabled="secondsRemaining > 0"
+          class="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#59B292] text-white font-bold hover:bg-[#478f76] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H3m12 0-4-4m4 4-4 4m5-13h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3" />
@@ -60,7 +61,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
@@ -69,10 +70,92 @@ const email = ref('')
 const password = ref('')
 const errorMessage = ref('')
 
+// Throttling / Rate-Limiting state
+const failedAttempts = ref(Number(localStorage.getItem('admin-failed-attempts') || 0))
+const lockoutUntil = ref(Number(localStorage.getItem('admin-lockout-until') || 0))
+const secondsRemaining = ref(0)
+let timer = null
+
+function updateLockoutTimer() {
+  const now = Date.now()
+  if (lockoutUntil.value > now) {
+    secondsRemaining.value = Math.ceil((lockoutUntil.value - now) / 1000)
+    errorMessage.value = `Terlalu banyak percobaan masuk. Coba lagi dalam ${secondsRemaining.value} detik.`
+    if (!timer) {
+      timer = setInterval(() => {
+        const remaining = Math.ceil((lockoutUntil.value - Date.now()) / 1000)
+        if (remaining <= 0) {
+          clearInterval(timer)
+          timer = null
+          secondsRemaining.value = 0
+          errorMessage.value = ''
+          localStorage.removeItem('admin-lockout-until')
+          localStorage.removeItem('admin-failed-attempts')
+          failedAttempts.value = 0
+        } else {
+          secondsRemaining.value = remaining
+          errorMessage.value = `Terlalu banyak percobaan masuk. Coba lagi dalam ${secondsRemaining.value} detik.`
+        }
+      }, 1000)
+    }
+  } else {
+    secondsRemaining.value = 0
+    if (timer) {
+      clearInterval(timer)
+      timer = null
+    }
+  }
+}
+
+onMounted(() => {
+  updateLockoutTimer()
+})
+
+onUnmounted(() => {
+  if (timer) clearInterval(timer)
+})
+
 function handleLogin() {
+  errorMessage.value = ''
+
+  // Check lockout
+  const now = Date.now()
+  if (lockoutUntil.value > now) {
+    updateLockoutTimer()
+    return
+  }
+
   if (!email.value || !password.value) {
     errorMessage.value = 'Email dan password wajib diisi.'
     return
+  }
+
+  // Pre-configured credentials
+  const correctEmail = 'admin@umkmkatalog.id'
+  const correctPassword = 'Admin#Hub2026'
+
+  if (email.value !== correctEmail || password.value !== correctPassword) {
+    failedAttempts.value++
+    localStorage.setItem('admin-failed-attempts', failedAttempts.value.toString())
+
+    if (failedAttempts.value >= 5) {
+      const lockDuration = 30000 // 30 seconds lockout
+      lockoutUntil.value = Date.now() + lockDuration
+      localStorage.setItem('admin-lockout-until', lockoutUntil.value.toString())
+      updateLockoutTimer()
+    } else {
+      errorMessage.value = `Email atau password salah. Sisa percobaan: ${5 - failedAttempts.value}`
+    }
+    return
+  }
+
+  // Success
+  failedAttempts.value = 0
+  localStorage.removeItem('admin-failed-attempts')
+  localStorage.removeItem('admin-lockout-until')
+  if (timer) {
+    clearInterval(timer)
+    timer = null
   }
 
   sessionStorage.setItem('umkm-admin-auth', 'true')
