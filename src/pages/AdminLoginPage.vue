@@ -27,7 +27,7 @@
             type="email"
             autocomplete="email"
             class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-white/10 text-gray-800 dark:text-white bg-white dark:bg-[#0d0f14] placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#59B292]/40 focus:border-[#59B292] transition-colors duration-300"
-            placeholder="admin@umkmkatalog.id"
+            placeholder="admin@admin"
           />
         </div>
 
@@ -39,7 +39,7 @@
             type="password"
             autocomplete="current-password"
             class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-white/10 text-gray-800 dark:text-white bg-white dark:bg-[#0d0f14] placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#59B292]/40 focus:border-[#59B292] transition-colors duration-300"
-            placeholder="Password"
+            placeholder="admin123"
           />
         </div>
 
@@ -131,8 +131,8 @@ function handleLogin() {
   }
 
   // Pre-configured credentials
-  const correctEmail = 'admin@umkmkatalog.id'
-  const correctPassword = 'Admin#Hub2026'
+  const correctEmail = 'admin@admin'
+  const correctPassword = 'admin123'
 
   if (email.value !== correctEmail || password.value !== correctPassword) {
     failedAttempts.value++
