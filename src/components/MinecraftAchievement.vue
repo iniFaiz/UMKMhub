@@ -103,14 +103,62 @@ function drawMinecraftCake(canvas) {
   row(12, 3, 12, shadow)
 }
 
+let audioCtx = null
+let achievementBuffer = null
+let isPreloading = false
+
+async function preloadAchievementSound() {
+  if (isPreloading || achievementBuffer) return
+  isPreloading = true
+  try {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)()
+    }
+    const response = await fetch('/achievement_sound_effect.mp3')
+    const arrayBuffer = await response.arrayBuffer()
+    achievementBuffer = await audioCtx.decodeAudioData(arrayBuffer)
+  } catch (e) {
+    // fallback preloading fails
+  } finally {
+    isPreloading = false
+  }
+}
+
 function playSound() {
   try {
+    if (!achievementBuffer) {
+      preloadAchievementSound().then(() => {
+        playDecodedSound()
+      })
+    } else {
+      playDecodedSound()
+    }
+  } catch (e) {
+    // Fallback to standard audio element if context fails
     const audio = new Audio('/achievement_sound_effect.mp3')
     audio.volume = 0.6
     audio.play().catch(() => {})
-  } catch (e) {
-    // silently ignore if audio fails
   }
+}
+
+function playDecodedSound() {
+  try {
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume()
+    }
+    if (audioCtx && achievementBuffer) {
+      const source = audioCtx.createBufferSource()
+      source.buffer = achievementBuffer
+      
+      const gainNode = audioCtx.createGain()
+      gainNode.gain.value = 0.6
+      
+      source.connect(gainNode)
+      gainNode.connect(audioCtx.destination)
+      
+      source.start(0)
+    }
+  } catch (e) {}
 }
 
 function triggerAchievement() {
@@ -159,6 +207,7 @@ function handleKeydown(e) {
 
 onMounted(() => {
   window.addEventListener('keydown', handleKeydown)
+  preloadAchievementSound()
 })
 
 onUnmounted(() => {
