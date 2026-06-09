@@ -7,6 +7,7 @@ import AdminLoginPage from '../pages/AdminLoginPage.vue'
 import TermsPage from '../pages/TermsPage.vue'
 import PrivacyPage from '../pages/PrivacyPage.vue'
 import AchievementsPage from '../pages/AchievementsPage.vue'
+import NotFoundPage from '../pages/NotFoundPage.vue'
 import { themeState, applyTheme } from '../stores/uiState'
 
 const routes = [
@@ -54,7 +55,8 @@ const routes = [
   },
   {
     path: '/:pathMatch(.*)*',
-    redirect: '/'
+    name: 'NotFound',
+    component: NotFoundPage
   }
 ]
 
@@ -70,6 +72,7 @@ router.beforeEach((to) => {
   // Force light mode on admin pages, otherwise restore preferred theme
   if (to.path.startsWith('/admin')) {
     themeState.forceLightMode = true
+    themeState.isDark = false
     document.documentElement.classList.remove('dark')
   } else {
     themeState.forceLightMode = false
