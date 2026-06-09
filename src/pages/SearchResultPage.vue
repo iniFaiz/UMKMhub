@@ -280,36 +280,19 @@ function truncate(text, maxLength = 100) {
 
 <style scoped>
 @keyframes egg67 {
-  0%, 100% {
-    transform: rotate(0deg) translateY(0);
-  }
-  10% {
-    transform: rotate(1.5deg) translateY(-8px);
-  }
-  20% {
-    transform: rotate(-1.5deg) translateY(8px);
-  }
-  30% {
-    transform: rotate(1.5deg) translateY(-8px);
-  }
-  40% {
-    transform: rotate(-1.5deg) translateY(8px);
-  }
-  50% {
-    transform: rotate(1deg) translateY(-4px);
-  }
-  60% {
-    transform: rotate(-1deg) translateY(4px);
-  }
-  70% {
-    transform: rotate(0.5deg) translateY(-2px);
-  }
-  80% {
-    transform: rotate(-0.5deg) translateY(2px);
-  }
-  90% {
-    transform: rotate(0deg) translateY(0);
-  }
+  0%   { transform: skewY(0deg) scale(1); }
+  10%  { transform: skewY(10deg) scale(1.04); }
+  25%  { transform: skewY(-10deg) scale(1.04); }
+  40%  { transform: skewY(10deg) scale(1.04); }
+  55%  { transform: skewY(-10deg) scale(1.04); }
+  70%  { transform: skewY(10deg) scale(1.04); }
+  85%  { transform: skewY(-10deg) scale(1.04); }
+  100% { transform: skewY(0deg) scale(1); }
+}
+
+.animate-egg-67 {
+  animation: egg67 1.8s cubic-bezier(0.6, 0.43, 0.68, 1.11) 1;
+  transform-origin: center center;
 }
 
 @keyframes barrelRoll {
@@ -319,11 +302,6 @@ function truncate(text, maxLength = 100) {
   100% {
     transform: rotate(360deg);
   }
-}
-
-.animate-egg-67 {
-  animation: egg67 4s ease-in-out;
-  transform-origin: center center;
 }
 
 .animate-barrel-roll {

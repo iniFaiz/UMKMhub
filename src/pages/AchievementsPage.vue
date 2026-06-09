@@ -8,7 +8,7 @@
           Ruang <span class="text-[#59B292]">Pencapaian</span>
         </h1>
         <p class="text-gray-600 dark:text-gray-400 max-w-xl mx-auto text-sm md:text-base mb-2">
-          Temukan rahasia yang tersembunyi di seluruh website ini.
+          Temukan rahasia yang tersembunyi di seluruh website ini. Lakukan tindakan khusus untuk membuka pencapaian eksklusif!
         </p>
         <p class="text-xs text-[#59B292] font-semibold">
           Terbuka: {{ unlockedCount }} / {{ achievements.length }} Rahasia
@@ -81,6 +81,13 @@
                       <path d="M6 7h4a2.5 2.5 0 0 1 0 5H6h4a2.5 2.5 0 0 1 0 5H6V7z" />
                       <path d="M15 17l3-10 3 10M16 13h4" />
                     </svg>
+                    <!-- Onigiri SVG -->
+                    <svg v-else-if="ach.id === 'sata_andagi'" class="w-8 h-8 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                      <!-- Rounded triangle for the rice body -->
+                      <path d="M12 3c1.2 0 2.2.6 3.1 1.8l5.8 9.2c1.2 1.9.8 4.4-1.1 5.8a4.9 4.9 0 0 1-2.8.8H7a4.9 4.9 0 0 1-2.8-.8c-1.9-1.4-2.3-3.9-1.1-5.8l5.8-9.2C9.8 3.6 10.8 3 12 3z" />
+                      <!-- Nori seaweed wrap in the center bottom -->
+                      <path d="M9 15.5h6v4.5H9v-4.5z" fill="currentColor" />
+                    </svg>
                   </template>
                 </div>
               </div>
@@ -138,6 +145,7 @@ const isBarrelUnlocked = ref(false)
 const isConsoleUnlocked = ref(false)
 const isRainUnlocked = ref(false)
 const isKonamiUnlocked = ref(false)
+const isSataAndagiUnlocked = ref(false)
 
 const achievements = computed(() => [
   {
@@ -174,6 +182,13 @@ const achievements = computed(() => [
     description: 'Memasukkan kode legendaris Konami (↑ ↑ ↓ ↓ ← → ← → B A) di keyboard.',
     unlocked: isKonamiUnlocked.value,
     bgClass: 'bg-gradient-to-br from-[#FF55FF]/90 via-[#c035c0]/90 to-[#801080]/90 shadow-[#FF55FF]/10'
+  },
+  {
+    id: 'sata_andagi',
+    title: 'Sata Andagi!',
+    description: 'Menemukan kue manis Sata Andagi misterius pada halaman error 404 dan mengekliknya.',
+    unlocked: isSataAndagiUnlocked.value,
+    bgClass: 'bg-gradient-to-br from-amber-500/90 via-amber-600/90 to-amber-800/90 shadow-amber-500/10'
   }
 ])
 
@@ -187,6 +202,7 @@ function loadAchievements() {
   isConsoleUnlocked.value = localStorage.getItem('achievement_console') === 'true'
   isRainUnlocked.value = localStorage.getItem('achievement_rain') === 'true'
   isKonamiUnlocked.value = localStorage.getItem('achievement_konami') === 'true'
+  isSataAndagiUnlocked.value = localStorage.getItem('achievement_sata_andagi') === 'true'
 }
 
 function resetAchievements() {
@@ -196,6 +212,7 @@ function resetAchievements() {
     localStorage.removeItem('achievement_console')
     localStorage.removeItem('achievement_rain')
     localStorage.removeItem('achievement_konami')
+    localStorage.removeItem('achievement_sata_andagi')
     localStorage.removeItem('isRainingManuallyToggled')
     loadAchievements()
   }
